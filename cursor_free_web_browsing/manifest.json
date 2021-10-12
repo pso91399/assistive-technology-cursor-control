@@ -1,0 +1,25 @@
+{
+    "name": "CursorFree",
+    "version": "0.1",
+    "manifest_version": 2,
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "css": [
+                "injection.css"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ],
+    "web_accessible_resources": [
+        "injection.css"
+    ],
+    "browser_action": {
+        "default_popup": "popup.html",
+        "default_title": "menu"
+    }
+}
