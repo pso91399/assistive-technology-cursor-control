@@ -2,6 +2,17 @@
     "name": "CursorFree",
     "version": "0.1",
     "manifest_version": 2,
+    "permissions": [
+        "webRequest",
+        "ws://*/*",
+        "wss://*/*"
+    ],
+    "background": {
+        "scripts": [
+            "background.js"
+        ],
+        "persistent": true
+    },
     "content_scripts": [
         {
             "matches": [
