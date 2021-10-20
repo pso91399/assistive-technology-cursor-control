@@ -37,7 +37,7 @@ function setBackgroundColor() {
             //console.log("set");
         });
         testDivs[i].addEventListener("mouseleave", function() {
-            testDivs[i].style.backgroundColor = "white";
+            testDivs[i].style.backgroundColor = "transparent";
             //console.log("unset");
         })
     }
