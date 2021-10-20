@@ -9,7 +9,7 @@ serverSocket.onmessage = function (event) {
     console.log(scriptName, "serverSocket on message received");
     chrome.tabs.query({ active: true, currentWindow: true },
         function (tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, { "msgStr": event.data, "sender": "background" }, function (response) { });
+            chrome.tabs.sendMessage(tabs[0].id, { "sender": "background", "action": "receiveMessage", "msgStr": event.data }, function (response) { });
         });
 };
 
