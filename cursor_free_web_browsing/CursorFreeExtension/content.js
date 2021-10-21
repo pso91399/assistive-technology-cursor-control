@@ -77,50 +77,113 @@ function afterLoad(event) {
                 if (!response.success)
                     console.err(response);
             }
-        );   
+        ); 
 }
+
+// window.addEventListener("message", receiveContentScriptMessage, false);
+
+// function receiveContentScriptMessage(event) {
+//     // We only accept messages from ourselves
+//     if (event.source != window) {
+//         return;
+//     }
+
+//     let message = event.data;
+//     if (message.sender && (message.sender === "content")) {
+//         document.getElementById(message.id).dispatchEvent(new Event('click'));
+//     }
+// }
 `;
 let postInjectionScript = document.createElement('script');
 postInjectionScript.textContent = postInjectionCode;
 (document.head || document.documentElement).appendChild(postInjectionScript);
 postInjectionScript.parentNode.removeChild(postInjectionScript);
 
-let clickableIds = undefined;
+let clickablePositions = undefined;
 let index = 0;
 let lastCSS = -1;
 let lastIndex = -1;
 
 function nextClickable() {
-    if (index === clickableIds.length - 1) {
+    if (index === clickablePositions.length) {
         return;
     }
 
-    if (lastCSS !== -1) {
-        document.getElementById(clickableIds[lastIndex]).style.backgroundColor = lastCSS;
+    if (index == -1) {
+        index = 1;
     }
-    clickableElement = document.getElementById(clickableIds[index]);
+
+    if (lastCSS !== -1) {
+        document.getElementById(clickablePositions[lastIndex]["id"]).style.backgroundColor = lastCSS;
+    }
+    let clickableElement = document.getElementById(clickablePositions[index]["id"]);
     console.log(clickableElement);
     lastCSS = clickableElement.style.backgroundColor;
     clickableElement.style.backgroundColor = 'RED';
     lastIndex = index;
-    index ++;
+    index++;
 }
 
 
 function prevClickable() {
-    if (index === 0) {
+    if (index === -1) {
         return;
     }
 
-    if (lastCSS !== -1) {
-        document.getElementById(clickableIds[lastIndex]).style.backgroundColor = lastCSS;
+    if (index === clickablePositions.length) {
+        index = clickablePositions.length - 2;
     }
-    clickableElement = document.getElementById(clickableIds[index]);
+
+    if (lastCSS !== -1) {
+        document.getElementById(clickablePositions[lastIndex]["id"]).style.backgroundColor = lastCSS;
+    }
+    let clickableElement = document.getElementById(clickablePositions[index]["id"]);
     console.log(clickableElement);
     lastCSS = clickableElement.style.backgroundColor;
     clickableElement.style.backgroundColor = 'RED';
     lastIndex = index;
-    index --;
+    index--;
+}
+
+function clickCurrentElement() {
+    if (index === -1 || index === clickablePositions.length) {
+        return;
+    }
+
+    let id = clickablePositions[index]["id"];
+    // window.postMessage({ "sender": "content", "action": "click", "id": id}, "*")
+    document.getElementById(id).click();
+}
+
+function computeClickablePosition(clickableIds) {
+    clickablePositions = []
+    // Compute x y position
+    for (let i = 0; i < clickableIds.length; i++) {
+        let id = clickableIds[i];
+        let elementRectArray = document.getElementById(id).getClientRects();
+        if (elementRectArray.length === 0) {
+            continue;
+        }
+        let elementRect = elementRectArray[0];
+        let x = (elementRect.top + elementRect.bottom) / 2;
+        let y = (elementRect.left + elementRect.right) / 2;
+        clickablePositions.push({ "id": id, "x": x, "y": y });
+    }
+
+    // Sort by x y postion
+    clickablePositions.sort(function (a, b) {
+        let xA = a["x"];
+        let yA = a["y"];
+        let xB = b["x"];
+        let yB = b["y"];
+        if (xA == xB) {
+            return yA > yB ? 1 : -1;
+        }
+
+        return xA > xB ? 1 : -1;
+    });
+    console.log(clickablePositions);
+    return clickablePositions;
 }
 
 // Main entry of content.js code
@@ -129,9 +192,11 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         nextClickable();
     } else if (request["action"] === "prevClickableElement") {
         prevClickable();
+    } else if (request["action"] === "clickCurrentElement") {
+        clickCurrentElement();
     } else if (request["action"] === "receiveMessage") {
         console.log(scriptName, "Sender: ", request["sender"])
-        clickableIds = request["clickableIds"];
+        clickablePositions = computeClickablePosition(request["clickableIds"]);
     } else {
         console.log(scriptName, "action: ", request["action"]);
     }

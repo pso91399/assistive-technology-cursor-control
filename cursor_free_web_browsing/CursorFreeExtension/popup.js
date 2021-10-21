@@ -19,4 +19,9 @@ document.addEventListener("DOMContentLoaded", function () {
         .addEventListener("click",
             sendMessageToContent({ "sender": "popup", "action": "prevClickableElement" }),
             false);
+    document
+        .getElementById("click_current_element")
+        .addEventListener("click",
+            sendMessageToContent({ "sender": "popup", "action": "clickCurrentElement" }),
+            false);
 }, false);
