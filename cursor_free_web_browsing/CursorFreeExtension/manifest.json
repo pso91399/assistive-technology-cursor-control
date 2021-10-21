@@ -23,7 +23,8 @@
             ],
             "js": [
                 "content.js"
-            ]
+            ],
+            "run_at": "document_start"
         }
     ],
     "web_accessible_resources": [
@@ -32,5 +33,10 @@
     "browser_action": {
         "default_popup": "popup.html",
         "default_title": "menu"
+    },
+    "externally_connectable": {
+        "matches": [
+            "https://trends.google.com/*"
+        ]
     }
 }

@@ -9,17 +9,14 @@ function sendMessageToContent(message) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("send_test_message").addEventListener("click", sendMessageToContent({ "sender": "popup", "action": "sendMessage", "msgStr": "hello from chrome extension!" }), false);
-
-    buttonActionDictionary = {
-        "control_video_mute": "controlVideoMute",
-        "control_video_play": "controlVideoPlay",
-        "control_video_forward": "controlVideoForward",
-        "control_video_backward": "controlVideoBackward"
-    };
-
-    for (buttonId in buttonActionDictionary) {
-        document.getElementById(buttonId).addEventListener("click", sendMessageToContent({ "sender": "popup", "action": buttonActionDictionary[buttonId] }), false);
-    }
-
+    document
+        .getElementById("next_clickable_element")
+        .addEventListener("click",
+            sendMessageToContent({ "sender": "popup", "action": "nextClickableElement" }),
+            false);
+    document
+        .getElementById("prev_clickable_element")
+        .addEventListener("click",
+            sendMessageToContent({ "sender": "popup", "action": "prevClickableElement" }),
+            false);
 }, false);
