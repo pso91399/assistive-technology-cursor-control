@@ -14,31 +14,32 @@ function recordClickEvent(event, element) {
 }
 
 Window.prototype._addEventListener = Window.prototype.addEventListener;
-Window.prototype.addEventListener = function(a, b, c) {
-   if (c==undefined) c=false;
-   this._addEventListener(a,b,c);
-   if (! this.eventListenerList) this.eventListenerList = {};
-   if (! this.eventListenerList[a]) this.eventListenerList[a] = [];
-   recordClickEvent(a, this);
-   this.eventListenerList[a].push({listener:b,options:c});
+Window.prototype.addEventListener = function (a, b, c) {
+    if (c == undefined) c = false;
+    this._addEventListener(a, b, c);
+    if (!this.eventListenerList) this.eventListenerList = {};
+    if (!this.eventListenerList[a]) this.eventListenerList[a] = [];
+    recordClickEvent(a, this);
+    this.eventListenerList[a].push({ listener: b, options: c });
 };
 
 EventTarget.prototype._addEventListener = EventTarget.prototype.addEventListener;
-EventTarget.prototype.addEventListener = function(a, b, c) {
-   if (c==undefined) c=false;
-   this._addEventListener(a,b,c);
-   if (! this.eventListenerList) this.eventListenerList = {};
-   if (! this.eventListenerList[a]) this.eventListenerList[a] = [];
-   recordClickEvent(a, this);
-   this.eventListenerList[a].push({listener:b,options:c});
+EventTarget.prototype.addEventListener = function (a, b, c) {
+    if (c == undefined) c = false;
+    this._addEventListener(a, b, c);
+    if (!this.eventListenerList) this.eventListenerList = {};
+    if (!this.eventListenerList[a]) this.eventListenerList[a] = [];
+    recordClickEvent(a, this);
+    this.eventListenerList[a].push({ listener: b, options: c });
 };
 
-EventTarget.prototype._getEventListeners = function(a) {
-    if (! this.eventListenerList) this.eventListenerList = {};
-    if (a==undefined)  { return this.eventListenerList; }
+EventTarget.prototype._getEventListeners = function (a) {
+    if (!this.eventListenerList) this.eventListenerList = {};
+    if (a == undefined) { return this.eventListenerList; }
     return this.eventListenerList[a];
- };
+};
 `;
+
 let preInjectionScript = document.createElement('script');
 preInjectionScript.textContent = preInjectionCode;
 (document.head || document.documentElement).prepend(preInjectionScript);
@@ -65,19 +66,19 @@ function afterLoad(event) {
                 element.id.includes("#temp-fake-id-")
             ) {
                 element.id = (prefix + index);
-                index ++;
+                index++;
             }
             clickableIds.push(element.id);
         }
     }
 
     let extensionId = "iobeldeiocmfodmelocllpcagpjhilic";
-        chrome.runtime.sendMessage(extensionId, { "clickableIds": clickableIds },
-            function(response) {
-                if (!response.success)
-                    console.err(response);
-            }
-        ); 
+    chrome.runtime.sendMessage(extensionId, { "clickableIds": clickableIds },
+        function (response) {
+            if (!response.success)
+                console.err(response);
+        }
+    );
 }
 
 // window.addEventListener("message", receiveContentScriptMessage, false);
@@ -94,6 +95,7 @@ function afterLoad(event) {
 //     }
 // }
 `;
+
 let postInjectionScript = document.createElement('script');
 postInjectionScript.textContent = postInjectionCode;
 (document.head || document.documentElement).appendChild(postInjectionScript);
@@ -114,12 +116,15 @@ function nextClickable() {
     }
 
     if (lastCSS !== -1) {
-        document.getElementById(clickablePositions[lastIndex]["id"]).style.backgroundColor = lastCSS;
+        let lastElement = document.getElementById(clickablePositions[lastIndex]["id"]);
+        lastElement.style.backgroundColor = lastCSS;
+        lastElement.style.transform = "scale(1)";
     }
     let clickableElement = document.getElementById(clickablePositions[index]["id"]);
     console.log(clickableElement);
     lastCSS = clickableElement.style.backgroundColor;
     clickableElement.style.backgroundColor = 'RED';
+    clickableElement.style.transform = "scale(1.25)";
     lastIndex = index;
     index++;
 }
@@ -135,12 +140,15 @@ function prevClickable() {
     }
 
     if (lastCSS !== -1) {
-        document.getElementById(clickablePositions[lastIndex]["id"]).style.backgroundColor = lastCSS;
+        let lastElement = document.getElementById(clickablePositions[lastIndex]["id"]);
+        lastElement.style.backgroundColor = lastCSS;
+        lastElement.style.transform = "scale(1)";
     }
     let clickableElement = document.getElementById(clickablePositions[index]["id"]);
     console.log(clickableElement);
     lastCSS = clickableElement.style.backgroundColor;
     clickableElement.style.backgroundColor = 'RED';
+    clickableElement.style.transform = "scale(1.25)";
     lastIndex = index;
     index--;
 }
@@ -155,12 +163,13 @@ function clickCurrentElement() {
     document.getElementById(id).click();
 }
 
-function computeClickablePosition(clickableIds) {
+function prepareClickablePosition(clickableIds) {
     clickablePositions = []
     // Compute x y position
     for (let i = 0; i < clickableIds.length; i++) {
         let id = clickableIds[i];
-        let elementRectArray = document.getElementById(id).getClientRects();
+        let element = document.getElementById(id);
+        let elementRectArray = element.getClientRects();
         if (elementRectArray.length === 0) {
             continue;
         }
@@ -196,7 +205,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         clickCurrentElement();
     } else if (request["action"] === "receiveMessage") {
         console.log(scriptName, "Sender: ", request["sender"])
-        clickablePositions = computeClickablePosition(request["clickableIds"]);
+        clickablePositions = prepareClickablePosition(request["clickableIds"]);
     } else {
         console.log(scriptName, "action: ", request["action"]);
     }
