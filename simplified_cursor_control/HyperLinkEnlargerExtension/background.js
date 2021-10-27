@@ -50,13 +50,11 @@ function setBackgroundColor() {
       })
   }
 
-  var mouseHover = document.querySelectorAll('.yuRUbf, .VwiC3b.yXK7lf.MUxGbd.yDYNvb.lyLwlc.lEBKkf')
-  var mouseDivs = Array.prototype.filter.call(mouseHover, function(testElement){
-      return testElement.nodeName === 'DIV';
-  });
-  for(let i = 0; i < mouseDivs.length; i++) {
-    mouseDivs[i].addEventListener("mouseover", function() {
-      mouseDivs[i].style.cursor = "pointer";
+  var mouseHover = document.querySelectorAll('.yuRUbf, .VwiC3b.yXK7lf.MUxGbd.yDYNvb.lyLwlc.lEBKkf, .aCOpRe.ljeAnf')
+  for(let i = 0; i < mouseHover.length; i++) {
+    console.log(mouseHover[i])
+    mouseHover[i].addEventListener("mouseover", function() {
+      mouseHover[i].style.cursor = "pointer";
     });
   }
 }
@@ -69,7 +67,7 @@ function enlargeClickableArea() {
       return false;
  });
  // Find hyperlink of text field by finding its parent since text element does not contain a hyperlink.
- $(".VwiC3b.yXK7lf.MUxGbd.yDYNvb.lyLwlc.lEBKkf").click(function(){
+ $(".VwiC3b.yXK7lf.MUxGbd.yDYNvb.lyLwlc.lEBKkf, .aCOpRe.ljeAnf").click(function(){
       window.location=$($(this)[0].parentElement.parentElement.getElementsByTagName('a'))[0].getAttribute("href");
       return false;
  })
