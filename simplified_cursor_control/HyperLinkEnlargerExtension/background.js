@@ -35,7 +35,7 @@ function setBackgroundColor() {
   for(let i = 0; i < testDivs.length; i++) {
       // Set background color.
       testDivs[i].addEventListener("mouseover", function() {
-          if (testDivs[i].className !== 'g') {
+          if (testDivs[i].className === 'usJj9c' || testDivs[i].className === 'usJj9c') {
             testDivs[i].style.cursor = "pointer";
           }
           if (testDivs[i].className === 'usJj9c') {
