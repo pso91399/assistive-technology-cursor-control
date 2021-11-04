@@ -9,6 +9,7 @@
     ],
     "background": {
         "scripts": [
+            "socket.io.min.js",
             "background.js"
         ],
         "persistent": true

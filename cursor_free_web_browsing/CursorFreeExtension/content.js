@@ -121,7 +121,7 @@ function nextClickable() {
         lastElement.style.transform = "scale(1)";
     }
     let clickableElement = document.getElementById(clickablePositions[index]["id"]);
-    console.log(clickableElement);
+    // console.log(clickableElement);
     lastCSS = clickableElement.style.backgroundColor;
     clickableElement.style.backgroundColor = 'RED';
     clickableElement.style.transform = "scale(1.25)";
@@ -145,7 +145,7 @@ function prevClickable() {
         lastElement.style.transform = "scale(1)";
     }
     let clickableElement = document.getElementById(clickablePositions[index]["id"]);
-    console.log(clickableElement);
+    // console.log(clickableElement);
     lastCSS = clickableElement.style.backgroundColor;
     clickableElement.style.backgroundColor = 'RED';
     clickableElement.style.transform = "scale(1.25)";
@@ -203,9 +203,14 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         prevClickable();
     } else if (request["action"] === "clickCurrentElement") {
         clickCurrentElement();
-    } else if (request["action"] === "receiveMessage") {
-        console.log(scriptName, "Sender: ", request["sender"])
+    } else if (request["action"] === "testServerLoopback") {
+        console.log(scriptName, "testServerLoopback");
+        chrome.runtime.sendMessage({ "sender": "content", "action": "testServerLoopback" });
+    } else if (request["action"] === "pageMessage") {
+        console.log(scriptName, "Sender: ", request["sender"]);
         clickablePositions = prepareClickablePosition(request["clickableIds"]);
+    } else if (request["action"] === "serverMessage") {
+        console.log(scriptName, "serverMessage: ", request["msgStr"]);
     } else {
         console.log(scriptName, "action: ", request["action"]);
     }

@@ -24,4 +24,9 @@ document.addEventListener("DOMContentLoaded", function () {
         .addEventListener("click",
             sendMessageToContent({ "sender": "popup", "action": "clickCurrentElement" }),
             false);
+    document
+        .getElementById("test_server_loopback")
+        .addEventListener("click",
+            sendMessageToContent({ "sender": "popup", "action": "testServerLoopback" }),
+            false);
 }, false);
