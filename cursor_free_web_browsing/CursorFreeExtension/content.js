@@ -195,23 +195,40 @@ function prepareClickablePosition(clickableIds) {
     return clickablePositions;
 }
 
+function testServerLoopback() {
+    console.log(scriptName, "testServerLoopback");
+    chrome.runtime.sendMessage({ "sender": "content", "action": "testServerLoopback" });
+}
+
+function handlePageMessage(request) {
+    console.log(scriptName, "Sender: ", request["sender"]);
+    clickablePositions = prepareClickablePosition(request["clickableIds"]);
+}
+
+function handleServerMessage(request) {
+    console.log(scriptName, "serverMessage: ", request["msgStr"]);
+}
+
+const popupHandler = {
+    "nextClickableElement": nextClickable,
+    "prevClickableElement": prevClickable,
+    "clickCurrentElement": clickCurrentElement,
+    "testServerLoopback": testServerLoopback
+};
+
+const backgroundHandler = {
+    "pageMessage": handlePageMessage,
+    "serverMessage": handleServerMessage
+};
+
 // Main entry of content.js code
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    if (request["action"] === "nextClickableElement") {
-        nextClickable();
-    } else if (request["action"] === "prevClickableElement") {
-        prevClickable();
-    } else if (request["action"] === "clickCurrentElement") {
-        clickCurrentElement();
-    } else if (request["action"] === "testServerLoopback") {
-        console.log(scriptName, "testServerLoopback");
-        chrome.runtime.sendMessage({ "sender": "content", "action": "testServerLoopback" });
-    } else if (request["action"] === "pageMessage") {
-        console.log(scriptName, "Sender: ", request["sender"]);
-        clickablePositions = prepareClickablePosition(request["clickableIds"]);
-    } else if (request["action"] === "serverMessage") {
-        console.log(scriptName, "serverMessage: ", request["msgStr"]);
+    if (request["sender"] === "popup") {
+        popupHandler[request["action"]]();
+    } else if (request["sender"] === "background") {
+        backgroundHandler[request["action"]](request);
     } else {
-        console.log(scriptName, "action: ", request["action"]);
+        console.log(scriptName, "Unknown message", request);
     }
 });
+
