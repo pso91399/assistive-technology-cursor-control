@@ -10,7 +10,7 @@ socket.on('message', function (msg) {
     console.log(scriptName, "Received message from server:", msg);
     chrome.tabs.query({ active: true, currentWindow: true },
         function (tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, { "sender": "background", "action": "serverMessage", "msgStr": msg });
+            chrome.tabs.sendMessage(tabs[0].id, { "sender": "server", "action": msg["action"], "direction": msg["direction"] });
         });
 });
 

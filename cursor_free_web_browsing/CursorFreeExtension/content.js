@@ -101,70 +101,64 @@ postInjectionScript.textContent = postInjectionCode;
 (document.head || document.documentElement).appendChild(postInjectionScript);
 postInjectionScript.parentNode.removeChild(postInjectionScript);
 
-let clickablePositions = undefined;
-let index = 0;
-let lastCSS = -1;
-let lastIndex = -1;
+let clickableGrid = undefined;
+let gridX = 0;
+let gridY = 0;
+let lastCSS = undefined;
+let directions = { "up": [-1, 0], "down": [1, 0], "left": [0, -1], "right": [0, 1] };
 
-function nextClickable() {
-    if (index === clickablePositions.length) {
+function moveSelection(reqeust) {
+    let direction = reqeust["direction"];
+    let nextGridX = gridX + directions[direction][0];
+    let nextGridY = gridY + directions[direction][1];
+    if (nextGridX >= clickableGrid.length) {
+        nextGridX = clickableGrid.length - 1;
+    }
+    if (nextGridX < 0) {
+        nextGridX = 0;
+    } 
+    if (nextGridY >= clickableGrid[nextGridX].length) {
+        nextGridY = clickableGrid[nextGridX].length - 1;
+    }
+    if (nextGridY < 0) {
+        nextGridY = 0;
+    }
+    if (nextGridX === gridX && nextGridY === gridY) {
         return;
     }
 
-    if (index == -1) {
-        index = 1;
-    }
-
+    // Restore the last selected element
     if (lastCSS !== -1) {
-        let lastElement = document.getElementById(clickablePositions[lastIndex]["id"]);
+        let lastElement = document.getElementById(clickableGrid[gridX][gridY]["id"]);
         lastElement.style.backgroundColor = lastCSS;
-        lastElement.style.transform = "scale(1)";
     }
-    let clickableElement = document.getElementById(clickablePositions[index]["id"]);
+    // Select the new element
+    gridX = nextGridX;
+    gridY = nextGridY;
+    let clickableElement = document.getElementById(clickableGrid[gridX][gridY]["id"]);
     // console.log(clickableElement);
     lastCSS = clickableElement.style.backgroundColor;
     clickableElement.style.backgroundColor = 'RED';
-    clickableElement.style.transform = "scale(1.25)";
-    lastIndex = index;
-    index++;
+    //clickableElement.style.transform = "scale(1.25)";
 }
 
-
-function prevClickable() {
-    if (index === -1) {
+function clickCurrentElement(reqeust) {
+    if (gridX >= clickableGrid.length || gridX < 0 ||
+        gridY >= clickableGrid[gridX].length || gridY < 0) {
         return;
     }
-
-    if (index === clickablePositions.length) {
-        index = clickablePositions.length - 2;
-    }
-
-    if (lastCSS !== -1) {
-        let lastElement = document.getElementById(clickablePositions[lastIndex]["id"]);
-        lastElement.style.backgroundColor = lastCSS;
-        lastElement.style.transform = "scale(1)";
-    }
-    let clickableElement = document.getElementById(clickablePositions[index]["id"]);
-    // console.log(clickableElement);
-    lastCSS = clickableElement.style.backgroundColor;
-    clickableElement.style.backgroundColor = 'RED';
-    clickableElement.style.transform = "scale(1.25)";
-    lastIndex = index;
-    index--;
-}
-
-function clickCurrentElement() {
-    if (index === -1 || index === clickablePositions.length) {
-        return;
-    }
-
-    let id = clickablePositions[index]["id"];
+    let id = clickableGrid[gridX][gridY]["id"];
     // window.postMessage({ "sender": "content", "action": "click", "id": id}, "*")
     document.getElementById(id).click();
 }
 
+function testServerLoopback(reqeust) {
+    console.log(scriptName, "testServerLoopback");
+    chrome.runtime.sendMessage({ "sender": "content", "action": "testServerLoopback" });
+}
+
 function prepareClickablePosition(clickableIds) {
-    clickablePositions = []
+    let absoluteClickablePositions = []
     // Compute x y position
     for (let i = 0; i < clickableIds.length; i++) {
         let id = clickableIds[i];
@@ -174,13 +168,15 @@ function prepareClickablePosition(clickableIds) {
             continue;
         }
         let elementRect = elementRectArray[0];
-        let x = (elementRect.top + elementRect.bottom) / 2;
-        let y = (elementRect.left + elementRect.right) / 2;
-        clickablePositions.push({ "id": id, "x": x, "y": y });
+        // let x = (elementRect.top + elementRect.bottom) / 2;
+        // let y = (elementRect.left + elementRect.right) / 2;
+        let x = elementRect.top;
+        let y = elementRect.left;
+        absoluteClickablePositions.push({ "id": id, "x": x, "y": y });
     }
 
     // Sort by x y postion
-    clickablePositions.sort(function (a, b) {
+    absoluteClickablePositions.sort(function (a, b) {
         let xA = a["x"];
         let yA = a["y"];
         let xB = b["x"];
@@ -191,18 +187,25 @@ function prepareClickablePosition(clickableIds) {
 
         return xA > xB ? 1 : -1;
     });
-    console.log(clickablePositions);
-    return clickablePositions;
-}
 
-function testServerLoopback() {
-    console.log(scriptName, "testServerLoopback");
-    chrome.runtime.sendMessage({ "sender": "content", "action": "testServerLoopback" });
+
+    clickableGrid = new Array()
+    let lastX = -1;
+    for (let position of absoluteClickablePositions) {
+        if (position["x"] !== lastX) {
+            lastX = position["x"];
+            clickableGrid.push(new Array());
+        }
+        clickableGrid.at(-1).push({ "id": position["id"] });
+    }
+    lastCSS = document.getElementById(clickableGrid[gridX][gridY]["id"]).style;
+    console.log(clickableGrid);
+    return clickableGrid;
 }
 
 function handlePageMessage(request) {
     console.log(scriptName, "Sender: ", request["sender"]);
-    clickablePositions = prepareClickablePosition(request["clickableIds"]);
+    clickableGrid = prepareClickablePosition(request["clickableIds"]);
 }
 
 function handleServerMessage(request) {
@@ -210,23 +213,28 @@ function handleServerMessage(request) {
 }
 
 const popupHandler = {
-    "nextClickableElement": nextClickable,
-    "prevClickableElement": prevClickable,
+    "move": moveSelection,
     "clickCurrentElement": clickCurrentElement,
     "testServerLoopback": testServerLoopback
 };
 
 const backgroundHandler = {
     "pageMessage": handlePageMessage,
-    "serverMessage": handleServerMessage
 };
+
+const serverHandler = {
+    "move": moveSelection,
+    "click": clickCurrentElement
+}
 
 // Main entry of content.js code
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request["sender"] === "popup") {
-        popupHandler[request["action"]]();
+        popupHandler[request["action"]](request);
     } else if (request["sender"] === "background") {
         backgroundHandler[request["action"]](request);
+    } else if (request["sender"] === "server") {
+        serverHandler[request["action"]](request);
     } else {
         console.log(scriptName, "Unknown message", request);
     }

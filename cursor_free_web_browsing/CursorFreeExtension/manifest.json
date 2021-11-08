@@ -5,7 +5,8 @@
     "permissions": [
         "webRequest",
         "ws://*/*",
-        "wss://*/*"
+        "wss://*/*",
+        "http://*/*"
     ],
     "background": {
         "scripts": [
@@ -37,7 +38,7 @@
     },
     "externally_connectable": {
         "matches": [
-            "https://trends.google.com/*"
+            "https://*.google.com/*"
         ]
     }
 }
