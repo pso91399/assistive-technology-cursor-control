@@ -10,18 +10,33 @@ function sendMessageToContent(message) {
 
 document.addEventListener("DOMContentLoaded", function () {
     document
-        .getElementById("next_clickable_element")
+        .getElementById("up")
         .addEventListener("click",
-            sendMessageToContent({ "sender": "popup", "action": "nextClickableElement" }),
+            sendMessageToContent({ "sender": "popup", "action": "move", "direction": "up" }),
             false);
     document
-        .getElementById("prev_clickable_element")
+        .getElementById("down")
         .addEventListener("click",
-            sendMessageToContent({ "sender": "popup", "action": "prevClickableElement" }),
+            sendMessageToContent({ "sender": "popup", "action": "move", "direction": "down" }),
+            false);
+    document
+        .getElementById("left")
+        .addEventListener("click",
+            sendMessageToContent({ "sender": "popup", "action": "move", "direction": "left" }),
+            false);
+    document
+        .getElementById("right")
+        .addEventListener("click",
+            sendMessageToContent({ "sender": "popup", "action": "move", "direction": "right" }),
             false);
     document
         .getElementById("click_current_element")
         .addEventListener("click",
             sendMessageToContent({ "sender": "popup", "action": "clickCurrentElement" }),
+            false);
+    document
+        .getElementById("test_server_loopback")
+        .addEventListener("click",
+            sendMessageToContent({ "sender": "popup", "action": "testServerLoopback" }),
             false);
 }, false);

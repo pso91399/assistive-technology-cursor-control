@@ -5,10 +5,12 @@
     "permissions": [
         "webRequest",
         "ws://*/*",
-        "wss://*/*"
+        "wss://*/*",
+        "http://*/*"
     ],
     "background": {
         "scripts": [
+            "socket.io.min.js",
             "background.js"
         ],
         "persistent": true
@@ -36,7 +38,7 @@
     },
     "externally_connectable": {
         "matches": [
-            "https://trends.google.com/*"
+            "https://*.google.com/*"
         ]
     }
 }
