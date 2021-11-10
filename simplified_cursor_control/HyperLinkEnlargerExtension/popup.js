@@ -11,9 +11,9 @@ changeColor.addEventListener("click", async () => {
             changeColor.style.backgroundColor = color;
         });
     }
-    
+
     let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    
+
     chrome.scripting.executeScript({
         target: { tabId: tab.id },
         function: setBackgroundColor,
@@ -30,12 +30,12 @@ function setBackgroundColor() {
     // qGXjvb: Ads on top of search results
     // usJj9c: Sublinks
     var testElements = document.querySelectorAll('.g, .qGXjvb, .usJj9c')
-    var testDivs = Array.prototype.filter.call(testElements, function(testElement){
+    var testDivs = Array.prototype.filter.call(testElements, function (testElement) {
         return testElement.nodeName === 'DIV';
     });
-    for(let i = 0; i < testDivs.length; i++) {
+    for (let i = 0; i < testDivs.length; i++) {
         // Set background color.
-        testDivs[i].addEventListener("mouseover", function() {
+        testDivs[i].addEventListener("mouseover", function () {
             if (testDivs[i].className === 'usJj9c') {
                 testDivs[i].style.backgroundColor = "#87CEEB";
             } else {
@@ -43,7 +43,7 @@ function setBackgroundColor() {
             }
         });
         // Unset background color.
-        testDivs[i].addEventListener("mouseleave", function() {
+        testDivs[i].addEventListener("mouseleave", function () {
             testDivs[i].style.backgroundColor = "transparent";
         })
     }
@@ -51,21 +51,20 @@ function setBackgroundColor() {
 
 function enlargeClickableArea() {
     // Find hyperlink contained inside an element.
-    $(".yuRUbf, .qGXjvb, .usJj9c").click(function(){
-        console.log($(this))
-        window.location=$(this).find("a").attr("href");
+    $(".yuRUbf, .qGXjvb, .usJj9c").click(function () {
+        window.location = $(this).find("a").attr("href");
         return false;
-   });
-   // Find hyperlink of text field by finding its parent since text element does not contain a hyperlink.
-   $(".VwiC3b.yXK7lf.MUxGbd.yDYNvb.lyLwlc.lEBKkf").click(function(){
-        window.location=$($(this)[0].parentElement.parentElement.getElementsByTagName('a'))[0].getAttribute("href");
+    });
+    // Find hyperlink of text field by finding its parent since text element does not contain a hyperlink.
+    $(".VwiC3b.yXK7lf.MUxGbd.yDYNvb.lyLwlc.lEBKkf").click(function () {
+        window.location = $($(this)[0].parentElement.parentElement.getElementsByTagName('a'))[0].getAttribute("href");
         return false;
-   })
-   
+    })
+
     // $('.g').after(jQuery.parseHTML('<a href="https://www.apple.com/macbook-air/" data-ved="2ahUKEwj75-uIktfzAhXTLH0KHVbfAtwQtwJ6BAg-EAM" ping="/url?sa=t&amp;source=web&amp;rct=j&amp;url=https://www.apple.com/macbook-air/&amp;ved=2ahUKEwj75-uIktfzAhXTLH0KHVbfAtwQtwJ6BAg-EAM">'));
     // $('.g').before(jQuery.parseHTML('</a>'));
     // $('.g').replaceWith('<a href="https://www.apple.com/macbook-air/" data-ved="2ahUKEwj75-uIktfzAhXTLH0KHVbfAtwQtwJ6BAg-EAM" ping="/url?sa=t&amp;source=web&amp;rct=j&amp;url=https://www.apple.com/macbook-air/&amp;ved=2ahUKEwj75-uIktfzAhXTLH0KHVbfAtwQtwJ6BAg-EAM">' + $('.g').text() + '</a>');
-    
+
     //     var testElements = document.getElementsByClassName("g");
     //     var testDivs = Array.prototype.filter.call(testElements, function(testElement){
     //         return testElement.nodeName === 'DIV';
