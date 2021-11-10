@@ -25,10 +25,12 @@ def connect_mediapipe():
 def disconnect_mediapipe():
     print('Mediapipe connected')
 
+
 @socketio.on('message', namespace='/mediapipe')
 def message_mediapipe(message):
     print(f'Mediapipe send {message} to extension')
     socketio.send(message, namespace='/extension')
+
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

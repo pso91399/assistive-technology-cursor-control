@@ -116,7 +116,7 @@ function moveSelection(reqeust) {
     }
     if (nextGridX < 0) {
         nextGridX = 0;
-    } 
+    }
     if (nextGridY >= clickableGrid[nextGridX].length) {
         nextGridY = clickableGrid[nextGridX].length - 1;
     }
