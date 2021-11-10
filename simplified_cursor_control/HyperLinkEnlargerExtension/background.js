@@ -98,7 +98,7 @@ function enlargeClickableArea() {
 
 // Highlight element with tag 'a' that is nearest to cursor position in Euclidian space
 function highlightNearestElement() {
-    // Find all elements with tag 'a', which is called links.
+    // Find all links with tag 'a'.
     let links = Array.from(document.querySelectorAll('a'));
 
     // Get coordination of the center of link rectangle.
@@ -129,15 +129,15 @@ function highlightNearestElement() {
                 // If there is a previous link rectangle that is highlighted by outline,
                 // resume its outline to previous one.
                 if (prevIdx >= 0) {
-                    elements[prevIdx].style.outline = prevOutline;
+                    links[prevIdx].style.outline = prevOutline;
                 }
 
                 // Record current highlighted link rectangle as next iteration's prev
-                prevOutline = elements[closestLinkIndex].style.outline;
+                prevOutline = links[closestLinkIndex].style.outline;
                 prevIdx = closestLinkIndex;
 
                 // Highlight current nearest link rectangle by changing its outline
-                elements[closestLinkIndex].style.outline = '#C85C5C solid 3px';
+                links[closestLinkIndex].style.outline = '#C85C5C solid 3px';
             }
         },
         {
