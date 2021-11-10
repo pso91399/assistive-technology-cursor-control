@@ -72,7 +72,7 @@ function afterLoad(event) {
         }
     }
 
-    let extensionId = "iobeldeiocmfodmelocllpcagpjhilic";
+    let extensionId = "gilogbcjbjgomknecgdapibjhjmnkmhd";
     chrome.runtime.sendMessage(extensionId, { "clickableIds": clickableIds },
         function (response) {
             if (!response.success)

@@ -1,3 +1,24 @@
+import socketio
+
+sio = socketio.Client()
+
+@sio.event
+def connect():
+    print('connection established')
+
+@sio.event
+def my_message(data):
+    print('message received with ', data)
+    sio.emit('my response', {'response': 'my response'})
+
+@sio.event
+def disconnect():
+    print('disconnected from server')
+
+
+sio.connect('http://127.0.0.1:5000', transports='websocket', namespaces='/mediapipe')
+
+
 import collections
 import cv2
 import mediapipe as mp
@@ -108,13 +129,13 @@ def process_pipeline(center, w, h, history, startWidth, startHeight, closeWidth,
             head, tail = history[0], history[-1]
             history.append(center)
             if tail[0] - head[0] > 80:
-                message = "Right"
+                message = "right"
             elif tail[0] - head[0] < -80:
-                message = "Left"
+                message = "left"
             elif tail[1] - head[1] > 50:
-                message = "Down"
+                message = "down"
             else:
-                message = "Up"
+                message = "up"
 
     return message, history
 
@@ -126,6 +147,10 @@ def convertTuple(tup):
         ans += ' '
     return ans
 
+import time
+
+def get_current_milli_time():
+    return round(time.time() * 1000)
 
 cap = cv2.VideoCapture(0)
 
@@ -141,15 +166,16 @@ center_queue = collections.deque(5 * [(0, 0)], 5)
 
 closed = collections.deque(5 * [0], 5)
 history = []
+last_send_time = get_current_milli_time()
 while True:
     _, frame = cap.read()
     # Flip frame for correct handedness
     frame = cv2.flip(frame, 1)
     img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     cv2.rectangle(frame, (width//2 - startWidth - 1, height//2 - startHeight-1),
-                  (width//2 + startWidth - 1, height//2 + startHeight - 1), (30, 144, 255), 3)
+                (width//2 + startWidth - 1, height//2 + startHeight - 1), (30, 144, 255), 3)
     cv2.rectangle(frame, (width//2 - closeWidth - 1, height//2 - closeHeight-1),
-                  (width//2 + closeWidth - 1, height//2 + closeHeight - 1), (30, 144, 255), 3)
+                (width//2 + closeWidth - 1, height//2 + closeHeight - 1), (30, 144, 255), 3)
     results = hands.process(img)
     if results.multi_hand_landmarks:
         hand_landmarks = results.multi_hand_landmarks[0]
@@ -157,6 +183,10 @@ while True:
         center, radius = palm_center(keypoints)
         message, history = process_pipeline(
             center, width//2, height//2, history, startWidth, startHeight, closeWidth, closeHeight)
+        current_time = get_current_milli_time()
+        if (current_time // 500 != last_send_time // 500 and message in ['left', 'right', 'up', 'down']):
+            sio.send(message, namespace='/mediapipe')
+            last_send_time = current_time
         cv2.putText(frame, message, (10, 50),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
         relative_queue.appendleft(center)
@@ -164,7 +194,7 @@ while True:
         center = np.mean(center_queue, axis=0)
 
         # Cursor movement
-        if cursor_control == "joystick":
+        """if cursor_control == "joystick":
             joystick(center, frame)
         elif cursor_control == "relative":
             relative(center)
@@ -172,7 +202,7 @@ while True:
             absolute(center)
 
         if clicking_enabled:
-            mouse_command(keypoints, closed)
+            mouse_command(keypoints, closed)"""
 
         cv2.circle(frame, tuple(np.int32(center)), 2, (0, 255, 0), 2)
         cv2.circle(frame, tuple(np.int32(center)), radius, (0, 255, 0), 2)
@@ -183,7 +213,7 @@ while True:
 
     if cursor_control == "joystick":
         cv2.circle(frame, tuple(joystick_center),
-                   joystick_radius, (255, 0, 0), 2)
+                joystick_radius, (255, 0, 0), 2)
     cv2.imshow("MediaPipe Hands", frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
