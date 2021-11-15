@@ -129,11 +129,13 @@ while True:
  
         if length < 50:
             cv2.circle(img, (cx, cy), 15, (0, 255, 0), cv2.FILLED)
- 
+        cv2.putText(img, f'{int(length_average)} distance', (40, 90), cv2.FONT_HERSHEY_COMPLEX,
+                2, (0, 9, 255), 3)      
     cv2.rectangle(img, (50, 150), (85, 400), (255, 0, 0), 3)
     cv2.rectangle(img, (50, int(angleBar)), (85, 400), (255, 0, 0), cv2.FILLED)
-    #cv2.putText(img, f'{int(angleDeg)} deg', (40, 90), cv2.FONT_HERSHEY_COMPLEX,
-    #            2, (0, 9, 255), 3)
+    # cv2.putText(img, f'{int(angleDeg)} deg', (40, 90), cv2.FONT_HERSHEY_COMPLEX,
+    #             2, (0, 9, 255), 3)
+      
  
     cv2.imshow("Img", img)
     cv2.waitKey(1)
