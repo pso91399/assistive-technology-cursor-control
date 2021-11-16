@@ -120,11 +120,11 @@ while True:
        
 
         if last_length:
-            if length_relative>last_length * 2:
+            if length_relative>last_length :
                 keyboard.press(Key.media_volume_up)
                 keyboard.release(Key.media_volume_up)
                 print("VOL UP")
-            elif length_relative < last_length / 2:
+            elif length_relative < last_length:
                 keyboard.press(Key.media_volume_down)
                 keyboard.release(Key.media_volume_down)
                 print("VOL DOWN")
