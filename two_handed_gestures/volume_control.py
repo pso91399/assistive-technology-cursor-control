@@ -4,7 +4,6 @@ import time
 import numpy as np
 import mediapipe as mp
 import math
-
 from pynput.keyboard import Key,Controller
 
 class handDetector():
@@ -34,18 +33,21 @@ class handDetector():
     def findPosition(self, img, handNo=0, draw=True):
  
         lmList = []
+        z = []
+        depth_mean = -1
         if self.results.multi_hand_landmarks:
             myHand = self.results.multi_hand_landmarks[handNo]
             for id, lm in enumerate(myHand.landmark):
                 # print(id, lm)
                 h, w, c = img.shape
-                cx, cy = int(lm.x * w), int(lm.y * h)
+                cx, cy, cz = int(lm.x * w), int(lm.y * h), int(lm.z * w)
                 # print(id, cx, cy)
                 lmList.append([id, cx, cy])
+                z.append(cz)
                 if draw:
                     cv2.circle(img, (cx, cy), 15, (255, 0, 255), cv2.FILLED)
- 
-        return lmList
+            depth_mean = abs(np.average(z))
+        return lmList, depth_mean
 
 
 
@@ -80,8 +82,10 @@ stack = []
 
 while True:
     success, img = cap.read()
+    if not success:
+        break
     img = detector.findHands(img)
-    lmList = detector.findPosition(img, draw=False)
+    lmList, depth = detector.findPosition(img, draw=False)
     if len(lmList) != 0:
         # print(lmList[4], lmList[8])
  
@@ -93,14 +97,15 @@ while True:
         cv2.circle(img, (x2, y2), 15, (0, 0, 255), cv2.FILLED)
         cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 3)
         cv2.circle(img, (cx, cy), 15, (0, 0, 255), cv2.FILLED)
- 
+
         length = math.hypot(x2 - x1, y2 - y1)
+        length_relative = 10 * math.hypot(x2 - x1, y2 - y1) / depth
 
         # smoothing
-        if len(stack) == 50:
-            stack.pop()
-        stack.append(length)
-        length_average = np.average(stack)
+        # if len(stack) == 50:
+        #     stack.pop()
+        # stack.append(length_mean)
+        # length_average = np.average(stack)
 
 
         # print(length)
@@ -110,26 +115,34 @@ while True:
         # angle  = np.interp(length, [minHand, maxHand], [minAngle, maxAngle])
         # angleBar = np.interp(length, [minHand, maxHand], [400, 150])
         # angleDeg = np.interp(length, [minHand, maxHand], [0, 180])   # degree angle 0 - 180
+
+        
        
 
         if last_length:
-            if length_average>last_length * 10:
+            if length_relative>last_length * 2:
                 keyboard.press(Key.media_volume_up)
                 keyboard.release(Key.media_volume_up)
                 print("VOL UP")
-            elif length_average<last_length:
+            elif length_relative < last_length / 2:
                 keyboard.press(Key.media_volume_down)
                 keyboard.release(Key.media_volume_down)
                 print("VOL DOWN")
         
-        last_angle=angle
-        last_length=length_average
+        last_length=length_relative
 
         # print(int(length), angle)
+
+        
+
+
  
-        if length < 50:
+        if length_relative < 20:
             cv2.circle(img, (cx, cy), 15, (0, 255, 0), cv2.FILLED)
-        cv2.putText(img, f'{int(length_average)} distance', (40, 90), cv2.FONT_HERSHEY_COMPLEX,
+            keyboard.press(Key.media_volume_mute)
+            print("VOL MUTE")
+
+        cv2.putText(img, f'{int(length_relative)} distance', (40, 90), cv2.FONT_HERSHEY_COMPLEX,
                 2, (0, 9, 255), 3)      
     cv2.rectangle(img, (50, 150), (85, 400), (255, 0, 0), 3)
     cv2.rectangle(img, (50, int(angleBar)), (85, 400), (255, 0, 0), cv2.FILLED)
