@@ -1,29 +1,33 @@
+import time
+import pyautogui
+import numpy as np
+import mediapipe as mp
+import cv2
+import collections
 import socketio
 
 sio = socketio.Client()
 
+
 @sio.event
 def connect():
     print('connection established')
+
 
 @sio.event
 def my_message(data):
     print('message received with ', data)
     sio.emit('my response', {'response': 'my response'})
 
+
 @sio.event
 def disconnect():
     print('disconnected from server')
 
 
-sio.connect('http://127.0.0.1:5000', transports='websocket', namespaces='/mediapipe')
+sio.connect('http://127.0.0.1:5000',
+            transports='websocket', namespaces='/mediapipe')
 
-
-import collections
-import cv2
-import mediapipe as mp
-import numpy as np
-import pyautogui
 
 cursor_control = "absolute"
 clicking_enabled = False
@@ -147,10 +151,10 @@ def convertTuple(tup):
         ans += ' '
     return ans
 
-import time
 
 def get_current_milli_time():
     return round(time.time() * 1000)
+
 
 cap = cv2.VideoCapture(0)
 
@@ -173,9 +177,9 @@ while True:
     frame = cv2.flip(frame, 1)
     img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     cv2.rectangle(frame, (width//2 - startWidth - 1, height//2 - startHeight-1),
-                (width//2 + startWidth - 1, height//2 + startHeight - 1), (30, 144, 255), 3)
+                  (width//2 + startWidth - 1, height//2 + startHeight - 1), (30, 144, 255), 3)
     cv2.rectangle(frame, (width//2 - closeWidth - 1, height//2 - closeHeight-1),
-                (width//2 + closeWidth - 1, height//2 + closeHeight - 1), (30, 144, 255), 3)
+                  (width//2 + closeWidth - 1, height//2 + closeHeight - 1), (30, 144, 255), 3)
     results = hands.process(img)
     if results.multi_hand_landmarks:
         hand_landmarks = results.multi_hand_landmarks[0]
@@ -213,7 +217,7 @@ while True:
 
     if cursor_control == "joystick":
         cv2.circle(frame, tuple(joystick_center),
-                joystick_radius, (255, 0, 0), 2)
+                   joystick_radius, (255, 0, 0), 2)
     cv2.imshow("MediaPipe Hands", frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
