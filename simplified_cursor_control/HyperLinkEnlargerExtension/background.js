@@ -1,6 +1,7 @@
 //background.js
 
 var active = true;
+var nearestElement;
 
 chrome.action.onClicked.addListener(() => {
     active = !active;
@@ -24,6 +25,10 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         chrome.scripting.executeScript({
             target: { tabId: tab.id },
             function: highlightNearestElement,
+        });
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            function: activateNearestElement,
         });
     }
 })
@@ -138,10 +143,24 @@ function highlightNearestElement() {
 
                 // Highlight current nearest link rectangle by changing its outline
                 links[closestLinkIndex].style.outline = '#C85C5C solid 3px';
+                nearestElement = links[closestLinkIndex]
             }
         },
         {
             passive: true,
         }
     );
+}
+
+// Redirect mouse click event to the nearest element
+function activateNearestElement() {
+    document.addEventListener(
+        "click",
+        ev => {
+            nearestElement.click()
+        },
+        {
+            passive: true,
+        }
+    )
 }
