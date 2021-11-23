@@ -72,7 +72,7 @@ function afterLoad(event) {
         }
     }
 
-    let extensionId = "iobeldeiocmfodmelocllpcagpjhilic";
+    let extensionId = "gilogbcjbjgomknecgdapibjhjmnkmhd";
     chrome.runtime.sendMessage(extensionId, { "clickableIds": clickableIds },
         function (response) {
             if (!response.success)
@@ -116,7 +116,7 @@ function moveSelection(reqeust) {
     }
     if (nextGridX < 0) {
         nextGridX = 0;
-    } 
+    }
     if (nextGridY >= clickableGrid[nextGridX].length) {
         nextGridY = clickableGrid[nextGridX].length - 1;
     }

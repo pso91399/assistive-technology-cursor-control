@@ -4,7 +4,9 @@ import time
 import mediapipe as mp
 import numpy as np
 import pyautogui
-from pynput.keyboard import Key,Controller
+import math
+from pynput import keyboard
+from pynput.keyboard import Controller, Key
 
 def get_structured_landmarks(landmarks):
         # global structuredLandmarks
@@ -200,6 +202,43 @@ def joystick(center, frame):
         pyautogui.move(np.int32(mouse_vector)[0], np.int32(mouse_vector)[1], _pause=False)
         print('mouse vector', mouse_vector)
     cv2.line(frame, tuple(joystick_center), tuple(np.int32(center)), (255, 0, 0), 2)
+    
+def volume_control(landmarks):
+    Keyboard = Controller()
+    last_length = None
+    w, h = image.shape[1], image.shape[0]
+
+    x1, y1 = int(landmarks[4]['x'] * w), int(landmarks[4]['y'] * h)
+    print("X1 y1", x1, y1)
+    x2, y2 = int(landmarks[8]['x'] * w), int(landmarks[8]['y'] * h)
+    cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
+
+    cv2.circle(image, (x1, y1), 15, (0, 0, 255), cv2.FILLED)
+    cv2.circle(image, (x2, y2), 15, (0, 0, 255), cv2.FILLED)
+    cv2.line(image, (x1, y1), (x2, y2), (0, 0, 255), 3)
+    cv2.circle(image, (cx, cy), 15, (0, 0, 255), cv2.FILLED)
+
+    length = math.hypot(x2 - x1, y2 - y1)
+
+    if last_length:
+        if length>last_length:
+            Keyboard.press(Key.media_volume_up)
+            Keyboard.release(Key.media_volume_up)
+            print("VOL UP")
+        elif length<last_length:
+            Keyboard.press(Key.media_volume_down)
+            Keyboard.release(Key.media_volume_down)
+            print("VOL DOWN")
+    
+    last_length = length
+
+    if length < 50:
+        cv2.circle(image, (cx, cy), 15, (0, 255, 0), cv2.FILLED)
+        Keyboard.press(Key.media_volume_mute)
+        Keyboard.release(Key.media_volume_mute)
+
+    cv2.putText(image, f'{int(length)} distance', (40, 90), cv2.FONT_HERSHEY_COMPLEX,
+                2, (0, 9, 255), 3) 
 
 
 mp_drawing = mp.solutions.drawing_utils

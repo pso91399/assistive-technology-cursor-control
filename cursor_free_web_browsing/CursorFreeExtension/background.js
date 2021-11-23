@@ -1,6 +1,6 @@
 const scriptName = "background.js: ";
 
-const socket = io.connect("http://127.0.0.1:5000");
+const socket = io.connect("http://127.0.0.1:5000/extension");
 
 socket.on("connect", function () {
     console.log("Client connected!")
@@ -10,7 +10,7 @@ socket.on('message', function (msg) {
     console.log(scriptName, "Received message from server:", msg);
     chrome.tabs.query({ active: true, currentWindow: true },
         function (tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, { "sender": "server", "action": msg["action"], "direction": msg["direction"] });
+            chrome.tabs.sendMessage(tabs[0].id, { "sender": "server", "action": "move", "direction": msg });
         });
 });
 
