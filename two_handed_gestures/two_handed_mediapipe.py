@@ -1,7 +1,10 @@
+import collections
 import cv2
+import time
 import mediapipe as mp
 import numpy as np
 import pyautogui
+from pynput.keyboard import Key,Controller
 
 def get_structured_landmarks(landmarks):
         # global structuredLandmarks
@@ -158,6 +161,46 @@ def flip_hand(handedness):
     else:
         return 'Right'
 
+# organize landmarks for cursor control hand tracking
+def hand_keypoints(hand_landmarks):
+    points = []
+    for landmark in hand_landmarks.landmark:
+        points.append([landmark.x, landmark.y, landmark.z])
+    return np.array(points)
+
+def shoelace_area(points):
+    x0, y0 = np.hsplit(points, 2)
+    points1 = np.roll(points, -1, axis=0)
+    x1, y1 = np.hsplit(points1, 2)
+    combination = x0 * y1 - x1 * y0
+    area = np.sum(combination) / 2
+    return area, x0 + x1, y0 + y1, combination
+
+def palm_center(keypoints):
+    indices = [0, 1, 5, 9, 13, 17]
+    points = keypoints[indices, :2]
+    area, x, y, combination = shoelace_area(points)
+    center_x = np.sum(x * combination) / (6 * area)
+    center_y = np.sum(y * combination) / (6 * area)
+    center = np.array([center_x, center_y])
+    radius = int(np.min(np.linalg.norm(points - center, axis=1)) * np.mean(image.shape[:2]))
+    center = tuple(np.int32(center * image.shape[1::-1]))
+    return center, radius
+
+def absolute(center):
+    pyautogui.moveTo(center[0] * screen_width // width, center[1] * screen_height // height, _pause=False)
+
+def joystick(center, frame):
+    mouse_vector = center - joystick_center
+    length = np.linalg.norm(mouse_vector)
+    if length > joystick_radius:
+        mouse_vector = mouse_vector - np.array([joystick_radius, joystick_radius])
+        # mouse_vector = mouse_vector / length * (length - joystick_radius)
+        # mouse_move = np.multiply(np.power(abs(mouse_vector), 1.75) * 0.05, np.sign(mouse_vector))
+        pyautogui.move(np.int32(mouse_vector)[0], np.int32(mouse_vector)[1], _pause=False)
+        print('mouse vector', mouse_vector)
+    cv2.line(frame, tuple(joystick_center), tuple(np.int32(center)), (255, 0, 0), 2)
+
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -166,9 +209,18 @@ hands = mp_hands.Hands(
     min_detection_confidence=0.7)
 cap = cv2.VideoCapture(0)
 mode_mapping = {1: 'cursor', 2: 'scroll', 3: 'volume', 4: 'window'}
+center_queue = collections.deque(5 * [(0, 0)], 5)
 
+success, image = cap.read()
+screen_width, screen_height = pyautogui.size()
+height, width = image.shape[:2]
+joystick_center = np.array([int(0.75 * width), int(0.5 * height)])
+joystick_radius = 40
+
+pyautogui.FAILSAFE = False
 while cap.isOpened():
     success, image = cap.read()
+    image = cv2.flip(image, 1)
     if not success:
       print("Ignoring empty camera frame.")
       # If loading a video, use 'break' instead of 'continue'.
@@ -189,7 +241,7 @@ while cap.isOpened():
         left_hand = None
         for i, hand_landmarks in enumerate(results.multi_hand_landmarks):
             handedness = results.multi_handedness[i].classification[0].label
-            print(flip_hand(handedness))
+            print(handedness)
             mp_drawing.draw_landmarks(
                 image,
                 hand_landmarks,
@@ -202,23 +254,68 @@ while cap.isOpened():
                 landmark_data.append(point.x)
                 landmark_data.append(point.y)
             hand_gesture = recognize_hand_gesture(get_structured_landmarks(landmark_data), handedness)
-            if flip_hand(handedness) == 'Right':
+            if handedness == 'Right':
                 right_hand = hand_gesture
+                right_landmarks = hand_landmarks
                 cv2.putText(image, 'right hand gesture: ' + str(right_hand),
                 (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (209, 80, 0, 255), 3)
             else:
                 left_hand = hand_gesture
+                left_landmarks = hand_landmarks
                 cv2.putText(image, 'left hand gesture: ' + str(left_hand),
                 (10, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (209, 80, 0, 255), 3)
-            print(flip_hand(handedness) + ' recognized hand gesture: ', hand_gesture)
+            print(handedness + ' recognized hand gesture: ', hand_gesture)
         if left_hand in mode_mapping:
             mode = mode_mapping[left_hand]
             cv2.putText(image, 'mode: ' + mode, (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (209, 80, 0, 255), 3)
             if mode == 'scroll':
                 if right_hand == 1:
-                    pyautogui.press('up')
+                    # pyautogui.press('up')
+                    pyautogui.scroll(5)
                 elif right_hand == 'Arrow':
-                    pyautogui.press('down')
+                    # pyautogui.press('down')
+                    pyautogui.scroll(-5)
+                elif right_hand == 2:
+                    pyautogui.hscroll(10)
+                elif right_hand == 3:
+                    pyautogui.hscroll(-10) 
+            elif mode == 'cursor':
+                keypoints = hand_keypoints(right_landmarks)
+                center, radius = palm_center(keypoints)
+                center_queue.appendleft(center)
+                center = np.mean(center_queue, axis=0)
+                absolute(center)
+                # joystick(center, image)
+
+                cv2.circle(image, tuple(np.int32(center)), 2, (0, 255, 0), 2)
+                cv2.circle(image, tuple(np.int32(center)), radius, (0, 255, 0), 2)
+                cv2.circle(image, tuple(joystick_center), joystick_radius, (255, 0, 0), 2)
+
+                if right_hand == 1:
+                    pyautogui.click()
+                elif right_hand == 2:
+                    pyautogui.doubleClick()
+                elif right_hand == 'Arrow':
+                    pyautogui.rightClick()
+            elif mode == 'volume':
+                keyboard = Controller()
+                if right_hand == 1:
+                    keyboard.tap(Key.media_volume_up)
+                    time.sleep(0.3)
+                elif right_hand == 'Arrow':
+                    keyboard.tap(Key.media_volume_down)
+                    time.sleep(0.3)
+                elif right_hand == 2:
+                    keyboard.tap(Key.media_volume_mute)
+            elif mode == 'window':
+                if right_hand == 1: #switch to previous app
+                    pyautogui.hotkey('command', 'tab')
+                elif right_hand == 2: #browse windows
+                    pyautogui.hotkey('ctrl', 'up')
+                elif right_hand == 3: #minimize active window
+                    pyautogui.hotkey('command', 'm')
+
+                
 
     # Flip the image horizontally for a selfie-view display.
     cv2.imshow('MediaPipe Hands', image)
