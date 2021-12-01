@@ -1,3 +1,4 @@
+from time import time
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -5,6 +6,7 @@ import pyautogui
 import math
 from pynput import keyboard
 from pynput.keyboard import Controller, Key
+import time
 
 def get_structured_landmarks(landmarks):
         # global structuredLandmarks
@@ -263,13 +265,50 @@ while cap.isOpened():
                 Keyboard = Controller()
                 # got some problem with right-hand landmark detection?
                 # if flip_hand(handedness) == 'Right':
-                #     volume_control(get_structured_landmarks(landmark_data))
-                if right_hand == 1:
-                    Keyboard.press(Key.media_volume_up)
-                    Keyboard.release(Key.media_volume_up)
-                elif right_hand == 'Arrow':
-                    Keyboard.press(Key.media_volume_down)
-                    Keyboard.release(Key.media_volume_down)
+                #      volume_control(get_structured_landmarks(landmark_data))
+
+
+                if right_hand == 1: # new tab
+                    Keyboard.press(Key.cmd)
+                    Keyboard.press('t')
+                    Keyboard.release('t')
+                    Keyboard.release(Key.cmd)
+                    time.sleep(0.5)
+                
+                if right_hand == 2: # address bar
+                    Keyboard.press(Key.cmd)
+                    Keyboard.press('l')
+                    Keyboard.release('l')
+                    Keyboard.release(Key.cmd)
+
+                if right_hand == 4: # decrease text size
+                    Keyboard.press(Key.cmd)
+                    Keyboard.press('-')
+                    Keyboard.release('-')
+                    Keyboard.release(Key.cmd)
+                    time.sleep(0.5)
+                
+                if right_hand == 5: # increase text size
+                    Keyboard.press(Key.cmd)
+                    Keyboard.press('+')
+                    Keyboard.release('-')
+                    Keyboard.release(Key.cmd)
+                    time.sleep(0.5)
+                    
+                    
+                if right_hand == 'Arrow': # switch tab
+                    Keyboard.press(Key.ctrl)
+                    Keyboard.press(Key.tab)
+                    Keyboard.release(Key.tab)
+                    Keyboard.release(Key.ctrl)
+                    time.sleep(0.5)
+                
+                if right_hand == 3: #close tab
+                    Keyboard.press(Key.cmd)
+                    Keyboard.press('w')
+                    Keyboard.release('w')
+                    Keyboard.release(Key.cmd)
+                    time.sleep(0.5)
                 
 
 
