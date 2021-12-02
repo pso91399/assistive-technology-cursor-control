@@ -7,6 +7,7 @@ import pyautogui
 import math
 from pynput import keyboard
 from pynput.keyboard import Controller, Key
+import time
 
 def get_structured_landmarks(landmarks):
         # global structuredLandmarks
@@ -247,7 +248,8 @@ mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(
     min_detection_confidence=0.7)
 cap = cv2.VideoCapture(0)
-mode_mapping = {1: 'cursor', 2: 'scroll', 3: 'volume', 4: 'window'}
+mode_mapping = {1: 'cursor', 2: 'scroll', 3: 'volume', 4: 'window', 5: 'safari'}
+time_start = None
 center_queue = collections.deque(5 * [(0, 0)], 5)
 
 success, image = cap.read()
@@ -312,6 +314,7 @@ while cap.isOpened():
                     # pyautogui.press('up')
                     pyautogui.scroll(5)
                 elif right_hand == 'Arrow':
+                    pyautogui.press('down')
                     # pyautogui.press('down')
                     pyautogui.scroll(-5)
                 elif right_hand == 2:
@@ -353,6 +356,55 @@ while cap.isOpened():
                     pyautogui.hotkey('ctrl', 'up')
                 elif right_hand == 3: #minimize active window
                     pyautogui.hotkey('command', 'm')
+            elif mode == 'safari':
+                if time_start is None:
+                    time_start = time.time()
+                time_stamp = time.time()
+                if (time_stamp - time_start > 1):
+                    time_start = time_stamp
+                    Keyboard = Controller()
+                    if right_hand == 1: # new tab
+                        Keyboard.press(Key.cmd)
+                        Keyboard.press('t')
+                        Keyboard.release('t')
+                        Keyboard.release(Key.cmd)
+                        #time.sleep(0.5)
+                    
+                    if right_hand == 2: # address bar
+                        Keyboard.press(Key.cmd)
+                        Keyboard.press('l')
+                        Keyboard.release('l')
+                        Keyboard.release(Key.cmd)
+                        #time.sleep(0.5)
+
+                    if right_hand == 4: # decrease text size
+                        Keyboard.press(Key.cmd)
+                        Keyboard.press('-')
+                        Keyboard.release('-')
+                        Keyboard.release(Key.cmd)
+                        #time.sleep(0.5)
+                    
+                    if right_hand == 5: # increase text size
+                        Keyboard.press(Key.cmd)
+                        Keyboard.press('+')
+                        Keyboard.release('-')
+                        Keyboard.release(Key.cmd)
+                        #time.sleep(0.5)
+                        
+                        
+                    if right_hand == 'Arrow': # switch tab
+                        Keyboard.press(Key.ctrl)
+                        Keyboard.press(Key.tab)
+                        Keyboard.release(Key.tab)
+                        Keyboard.release(Key.ctrl)
+                        #time.sleep(0.5)
+                    
+                    if right_hand == 3: #close tab
+                        Keyboard.press(Key.cmd)
+                        Keyboard.press('w')
+                        Keyboard.release('w')
+                        Keyboard.release(Key.cmd)
+                        #time.sleep(0.5)
 
                 
 
