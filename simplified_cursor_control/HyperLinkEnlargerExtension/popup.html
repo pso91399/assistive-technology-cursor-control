@@ -1,10 +1,33 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" href="button.css">
+    <link rel="stylesheet" href="popup.css">
   </head>
-  <body>
-    <button id="changeColor"></button>
+  <body style="width:300px;">
+    <h2 class="name">Simplified Cursor Control</h2>
+    <!-- <hr noshade> -->
+    <!-- Rounded switch -->
+    <div class="option">
+      <div>Google Search Hyperlink Enlarger</div>
+      <label class="switch">
+        <input id="hyperlink_enlarger_switch" type="checkbox">
+        <span class="slider round"></span>
+      </label>
+    </div>
+    <div class="option">
+      <div>Button Enlarger</div>
+      <label class="switch">
+        <input id="button_enlarger_switch" type="checkbox">
+        <span class="slider round"></span>
+      </label>
+    </div>
+    <div class="option">
+      <div>Click Nearest Element</div>
+      <label class="switch">
+        <input id="nearest_element_switch" type="checkbox">
+        <span class="slider round"></span>
+      </label>
+    </div>
     <script src="popup.js"></script>
   </body>
 </html>

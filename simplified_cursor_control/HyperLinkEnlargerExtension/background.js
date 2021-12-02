@@ -1,37 +1,64 @@
 //background.js
 
-var active = true;
 var nearestElement;
+var hyperlink_enlarger_active = false;
+var button_enlarger_active = false;
+var nearest_element_active = false;
 
-chrome.action.onClicked.addListener(() => {
-    active = !active;
-    if (active) {
-        chrome.action.setIcon({ path: "/images/on.png" });
-    } else {
-        chrome.action.setIcon({ path: "/images/off.png" });
-    }
+chrome.runtime.onInstalled.addListener(() => {
+    chrome.storage.local.set({ hyperlink_enlarger_active });
+    chrome.storage.local.set({ button_enlarger_active });
+    chrome.storage.local.set({ nearest_element_active });
 });
 
+// chrome.action.onClicked.addListener(() => {
+//     active = !active;
+//     if (active) {
+//         chrome.action.setIcon({ path: "/images/on.png" });
+//     } else {
+//         chrome.action.setIcon({ path: "/images/off.png" });
+//     }
+// });
+
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-    if (active && changeInfo.status == 'complete') {
-        chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            function: setBackgroundColor,
-        });
-        chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            function: enlargeClickableArea,
-        });
-        chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            function: highlightNearestElement,
-        });
-        chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            function: activateNearestElement,
-        });
-    }
-})
+
+    chrome.storage.local.get("hyperlink_enlarger_active", ({ hyperlink_enlarger_active }) => {
+        if (hyperlink_enlarger_active && changeInfo.status == 'complete') {
+            chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                function: setBackgroundColor,
+            });
+            chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                function: enlargeClickableArea,
+            });
+        }
+    });
+    
+    chrome.storage.local.get("button_enlarger_active", ({ button_enlarger_active }) => {
+        if (button_enlarger_active && changeInfo.status == 'complete') {
+            chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                function: enlargeButton,
+            });
+        }
+    });
+    
+    chrome.storage.local.get("nearest_element_active", ({ nearest_element_active }) => {
+        if (nearest_element_active && changeInfo.status == 'complete') {
+            chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                function: highlightNearestElement,
+            });
+            chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                function: activateNearestElement,
+            });
+        }
+    });
+
+});
+
 
 // Set background color of an element in order to indicate its clickable area has been enlarged
 function setBackgroundColor() {
@@ -163,4 +190,16 @@ function activateNearestElement() {
             passive: true,
         }
     )
+}
+
+
+
+function enlargeButton() {
+    let enlarge_button_string = `
+        a, button, input[type="button"], input[type="submit"] { transition: all .2s ease-in-out; }
+        a:hover, button:hover, input[type="button"]:hover, input[type="submit"]:hover { transform: scale(1.2); }
+    `;
+    const style = document.createElement('style');
+    style.textContent = enlarge_button_string;
+    document.head.append(style);
 }
