@@ -7,10 +7,11 @@ import collections
 import socketio
 import time
 from threading import Timer
-#sio = socketio.Client()
 
 
-"""
+sio = socketio.Client()
+
+
 @sio.event
 def connect():
     print('connection established')
@@ -29,7 +30,6 @@ def disconnect():
 
 sio.connect('http://127.0.0.1:5000',
             transports='websocket', namespaces='/mediapipe')
-"""
 
 cursor_control = "absolute"
 clicking_enabled = True
@@ -147,8 +147,8 @@ def process_pipeline(center, w, h, history, startWidth, startHeight, closeWidth,
     return message, history
 
 def process_line(center, history):
-    message = ''
-    if not history: return ""
+    message = 'none'
+    if not history: return ''
     scale = 3
     staticThrehold = 50
     lastx, lasty = history[-1][0], history[-1][1]
@@ -187,10 +187,13 @@ def timeout():
     print("Alarm!")
 
 cap = cv2.VideoCapture(0)
+cap.set(3, 1024)
+cap.set(4, 768)
 
 _, frame = cap.read()
 screen_width, screen_height = pyautogui.size()
 height, width = frame.shape[:2]
+print(height, width)
 startWidth, startHeight = width//6, height//5
 closeWidth, closeHeight = width//4, height//3
 joystick_center = np.array([int(0.75 * width), int(0.5 * height)])
@@ -226,13 +229,15 @@ while True:
         clickable = mouse_command(keypoints, closed)
         if clickable and clicking_enabled:
             t = Timer(2.0, timeout)
-            t.start()  
+            t.start()
             print('click!')
+            message = 'click'
+            sio.send(message, namespace='/mediapipe')
             clicking_enabled = False
 
         if current_time // 500 != last_send_time // 500 and not clickable:
             message, history = process_line(center, history)
-            #sio.send(message, namespace='/mediapipe')
+            sio.send(message, namespace='/mediapipe')
             last_send_time = current_time
             cv2.putText(frame, message, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0,  0), 2)
         relative_queue.appendleft(center)
