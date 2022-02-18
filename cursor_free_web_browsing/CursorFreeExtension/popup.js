@@ -35,6 +35,26 @@ document.addEventListener("DOMContentLoaded", function () {
             sendMessageToContent({ "sender": "popup", "action": "clickCurrentElement" }),
             false);
     document
+        .getElementById("print_current_element")
+        .addEventListener("click",
+            sendMessageToContent({ "sender": "popup", "action": "printCurrentElement" }),
+            false);
+    document
+        .getElementById("play")
+        .addEventListener("click",
+            sendMessageToContent({ "sender": "popup", "action": "playCurrentVideo" }),
+            false);
+    document
+        .getElementById("mute")
+        .addEventListener("click",
+            sendMessageToContent({ "sender": "popup", "action": "muteCurrentVideo" }),
+            false);
+    document
+        .getElementById("next")
+        .addEventListener("click",
+            sendMessageToContent({ "sender": "popup", "action": "playNextVideo" }),
+            false);
+    document
         .getElementById("test_server_loopback")
         .addEventListener("click",
             sendMessageToContent({ "sender": "popup", "action": "testServerLoopback" }),

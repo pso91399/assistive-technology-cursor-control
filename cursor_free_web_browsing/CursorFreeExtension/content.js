@@ -53,9 +53,10 @@ window.addEventListener("load", afterLoad, false);
 function afterLoad(event) {
     let elements = document.body.getElementsByTagName("*");
     let index = 0;
-    let prefix = "#universal-fake-id-";
+    let prefix = "#global-clickable-id-";
     let clickableTags = new Set(["a", "input", "button"]);
     let clickableIds = [];
+    
     for (let element of elements) {
         if (elementsWithDynamicClick.has(element) ||
             element.getAttribute('onclick') ||
@@ -72,8 +73,12 @@ function afterLoad(event) {
         }
     }
 
+    prefix = "#global-video-id-";
+    index = 0;
+    let videoIds = ["movie_player"];
+
     let extensionId = "gilogbcjbjgomknecgdapibjhjmnkmhd";
-    chrome.runtime.sendMessage(extensionId, { "clickableIds": clickableIds },
+    chrome.runtime.sendMessage(extensionId, { "clickableIds": clickableIds, "videoIds": videoIds },
         function (response) {
             if (!response.success)
                 console.err(response);
@@ -148,8 +153,66 @@ function clickCurrentElement(reqeust) {
         return;
     }
     let id = clickableGrid[gridX][gridY]["id"];
-    // window.postMessage({ "sender": "content", "action": "click", "id": id}, "*")
     document.getElementById(id).click();
+}
+
+function printCurrentElement(reqeust) {
+    if (gridX >= clickableGrid.length || gridX < 0 ||
+        gridY >= clickableGrid[gridX].length || gridY < 0) {
+        return;
+    }
+    let id = clickableGrid[gridX][gridY]["id"];
+    console.log("content.js", document.getElementById(id));
+}
+
+function playCurrentVideo(reqeust) {
+    if (gridX >= clickableGrid.length || gridX < 0 ||
+        gridY >= clickableGrid[gridX].length || gridY < 0) {
+        return;
+    }
+    let id = clickableGrid[gridX][gridY]["id"];
+    let element = document.getElementById(id);
+    if (element.id === "movie_player") {
+        console.log(element);
+        for (let prop in element) {
+            console.log(prop);
+        }
+        if (element.getPlayerState() === 2) { // Is paused
+            element.playVideo();
+        } else {
+            element.pauseVideo();
+        }
+    }
+}
+
+function muteCurrentVideo(reqeust) {
+    if (gridX >= clickableGrid.length || gridX < 0 ||
+        gridY >= clickableGrid[gridX].length || gridY < 0) {
+        return;
+    }
+    let id = clickableGrid[gridX][gridY]["id"];
+
+    let element = document.getElementById(id);
+    if (element.id === "movie_player") {
+        if (element.isMuted()) {
+            element.unMute();
+        } else {
+            element.mute();
+        }
+    }
+}
+
+function playNextVideo(reqeust) {
+    if (gridX >= clickableGrid.length || gridX < 0 ||
+        gridY >= clickableGrid[gridX].length || gridY < 0) {
+        return;
+    }
+    let id = clickableGrid[gridX][gridY]["id"];
+
+    let element = document.getElementById(id);
+    if (element.id === "movie_player") {
+
+    }
 }
 
 function testServerLoopback(reqeust) {
@@ -157,7 +220,7 @@ function testServerLoopback(reqeust) {
     chrome.runtime.sendMessage({ "sender": "content", "action": "testServerLoopback" });
 }
 
-function prepareClickablePosition(clickableIds) {
+function prepareClickablePosition(clickableIds, videoIds) {
     let absoluteClickablePositions = []
     // Compute x y position
     for (let i = 0; i < clickableIds.length; i++) {
@@ -168,8 +231,20 @@ function prepareClickablePosition(clickableIds) {
             continue;
         }
         let elementRect = elementRectArray[0];
-        // let x = (elementRect.top + elementRect.bottom) / 2;
-        // let y = (elementRect.left + elementRect.right) / 2;
+        let x = elementRect.top;
+        let y = elementRect.left;
+        absoluteClickablePositions.push({ "id": id, "x": x, "y": y });
+    }
+
+    // Compute x y position
+    for (let i = 0; i < videoIds.length; i++) {
+        let id = videoIds[i];
+        let element = document.getElementById(id);
+        let elementRectArray = element.getClientRects();
+        if (elementRectArray.length === 0) {
+            continue;
+        }
+        let elementRect = elementRectArray[0];
         let x = elementRect.top;
         let y = elementRect.left;
         absoluteClickablePositions.push({ "id": id, "x": x, "y": y });
@@ -205,7 +280,7 @@ function prepareClickablePosition(clickableIds) {
 
 function handlePageMessage(request) {
     console.log(scriptName, "Sender: ", request["sender"]);
-    clickableGrid = prepareClickablePosition(request["clickableIds"]);
+    clickableGrid = prepareClickablePosition(request["clickableIds"], request["videoIds"]);
 }
 
 function handleServerMessage(request) {
@@ -215,6 +290,10 @@ function handleServerMessage(request) {
 const popupHandler = {
     "move": moveSelection,
     "clickCurrentElement": clickCurrentElement,
+    "printCurrentElement": printCurrentElement,
+    "playCurrentVideo": playCurrentVideo,
+    "muteCurrentVideo": muteCurrentVideo,
+    "playNextVideo": playNextVideo,
     "testServerLoopback": testServerLoopback
 };
 
