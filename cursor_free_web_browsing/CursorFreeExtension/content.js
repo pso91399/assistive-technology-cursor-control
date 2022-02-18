@@ -61,7 +61,8 @@ function afterLoad(event) {
         if (elementsWithDynamicClick.has(element) ||
             element.getAttribute('onclick') ||
             element.getAttribute('href') ||
-            clickableTags.has(element.tagName)
+            clickableTags.has(element.tagName) ||
+            element.tagName.toLowerCase() === "video"
         ) {
             if (!element.id ||
                 element.id.includes("#temp-fake-id-")
@@ -73,12 +74,8 @@ function afterLoad(event) {
         }
     }
 
-    prefix = "#global-video-id-";
-    index = 0;
-    let videoIds = ["movie_player"];
-
     let extensionId = "gilogbcjbjgomknecgdapibjhjmnkmhd";
-    chrome.runtime.sendMessage(extensionId, { "clickableIds": clickableIds, "videoIds": videoIds },
+    chrome.runtime.sendMessage(extensionId, { "clickableIds": clickableIds },
         function (response) {
             if (!response.success)
                 console.err(response);
@@ -166,53 +163,15 @@ function printCurrentElement(reqeust) {
 }
 
 function playCurrentVideo(reqeust) {
-    if (gridX >= clickableGrid.length || gridX < 0 ||
-        gridY >= clickableGrid[gridX].length || gridY < 0) {
-        return;
-    }
-    let id = clickableGrid[gridX][gridY]["id"];
-    let element = document.getElementById(id);
-    if (element.id === "movie_player") {
-        console.log(element);
-        for (let prop in element) {
-            console.log(prop);
-        }
-        if (element.getPlayerState() === 2) { // Is paused
-            element.playVideo();
-        } else {
-            element.pauseVideo();
-        }
-    }
+    document.getElementsByClassName("ytp-play-button ytp-button")[0].click();
 }
 
 function muteCurrentVideo(reqeust) {
-    if (gridX >= clickableGrid.length || gridX < 0 ||
-        gridY >= clickableGrid[gridX].length || gridY < 0) {
-        return;
-    }
-    let id = clickableGrid[gridX][gridY]["id"];
-
-    let element = document.getElementById(id);
-    if (element.id === "movie_player") {
-        if (element.isMuted()) {
-            element.unMute();
-        } else {
-            element.mute();
-        }
-    }
+    document.getElementsByClassName("ytp-mute-button ytp-button")[0].click();
 }
 
 function playNextVideo(reqeust) {
-    if (gridX >= clickableGrid.length || gridX < 0 ||
-        gridY >= clickableGrid[gridX].length || gridY < 0) {
-        return;
-    }
-    let id = clickableGrid[gridX][gridY]["id"];
-
-    let element = document.getElementById(id);
-    if (element.id === "movie_player") {
-
-    }
+    document.getElementsByClassName("ytp-next-button ytp-button")[0].click();
 }
 
 function testServerLoopback(reqeust) {
@@ -220,25 +179,11 @@ function testServerLoopback(reqeust) {
     chrome.runtime.sendMessage({ "sender": "content", "action": "testServerLoopback" });
 }
 
-function prepareClickablePosition(clickableIds, videoIds) {
+function prepareClickablePosition(clickableIds) {
     let absoluteClickablePositions = []
     // Compute x y position
     for (let i = 0; i < clickableIds.length; i++) {
         let id = clickableIds[i];
-        let element = document.getElementById(id);
-        let elementRectArray = element.getClientRects();
-        if (elementRectArray.length === 0) {
-            continue;
-        }
-        let elementRect = elementRectArray[0];
-        let x = elementRect.top;
-        let y = elementRect.left;
-        absoluteClickablePositions.push({ "id": id, "x": x, "y": y });
-    }
-
-    // Compute x y position
-    for (let i = 0; i < videoIds.length; i++) {
-        let id = videoIds[i];
         let element = document.getElementById(id);
         let elementRectArray = element.getClientRects();
         if (elementRectArray.length === 0) {
@@ -280,7 +225,7 @@ function prepareClickablePosition(clickableIds, videoIds) {
 
 function handlePageMessage(request) {
     console.log(scriptName, "Sender: ", request["sender"]);
-    clickableGrid = prepareClickablePosition(request["clickableIds"], request["videoIds"]);
+    clickableGrid = prepareClickablePosition(request["clickableIds"]);
 }
 
 function handleServerMessage(request) {

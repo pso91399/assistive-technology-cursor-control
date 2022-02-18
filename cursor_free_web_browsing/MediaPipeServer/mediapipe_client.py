@@ -25,7 +25,7 @@ def disconnect():
     print('disconnected from server')
 
 
-sio.connect('http://127.0.0.1:5000',
+sio.connect('http://127.0.0.1:1998',
             transports='websocket', namespaces='/mediapipe')
 
 

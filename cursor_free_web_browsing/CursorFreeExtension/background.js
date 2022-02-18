@@ -1,6 +1,6 @@
 const scriptName = "background.js: ";
 
-const socket = io.connect("http://127.0.0.1:5000/extension");
+const socket = io.connect("http://127.0.0.1:1998/extension");
 
 socket.on("connect", function () {
     console.log("Client connected!")
