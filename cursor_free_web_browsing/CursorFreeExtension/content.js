@@ -53,14 +53,16 @@ window.addEventListener("load", afterLoad, false);
 function afterLoad(event) {
     let elements = document.body.getElementsByTagName("*");
     let index = 0;
-    let prefix = "#universal-fake-id-";
+    let prefix = "#global-clickable-id-";
     let clickableTags = new Set(["a", "input", "button"]);
     let clickableIds = [];
+    
     for (let element of elements) {
         if (elementsWithDynamicClick.has(element) ||
             element.getAttribute('onclick') ||
             element.getAttribute('href') ||
-            clickableTags.has(element.tagName)
+            clickableTags.has(element.tagName) ||
+            element.tagName.toLowerCase() === "video"
         ) {
             if (!element.id ||
                 element.id.includes("#temp-fake-id-")
@@ -148,8 +150,28 @@ function clickCurrentElement(reqeust) {
         return;
     }
     let id = clickableGrid[gridX][gridY]["id"];
-    // window.postMessage({ "sender": "content", "action": "click", "id": id}, "*")
     document.getElementById(id).click();
+}
+
+function printCurrentElement(reqeust) {
+    if (gridX >= clickableGrid.length || gridX < 0 ||
+        gridY >= clickableGrid[gridX].length || gridY < 0) {
+        return;
+    }
+    let id = clickableGrid[gridX][gridY]["id"];
+    console.log("content.js", document.getElementById(id));
+}
+
+function playCurrentVideo(reqeust) {
+    document.getElementsByClassName("ytp-play-button ytp-button")[0].click();
+}
+
+function muteCurrentVideo(reqeust) {
+    document.getElementsByClassName("ytp-mute-button ytp-button")[0].click();
+}
+
+function playNextVideo(reqeust) {
+    document.getElementsByClassName("ytp-next-button ytp-button")[0].click();
 }
 
 function testServerLoopback(reqeust) {
@@ -168,8 +190,6 @@ function prepareClickablePosition(clickableIds) {
             continue;
         }
         let elementRect = elementRectArray[0];
-        // let x = (elementRect.top + elementRect.bottom) / 2;
-        // let y = (elementRect.left + elementRect.right) / 2;
         let x = elementRect.top;
         let y = elementRect.left;
         absoluteClickablePositions.push({ "id": id, "x": x, "y": y });
@@ -215,6 +235,10 @@ function handleServerMessage(request) {
 const popupHandler = {
     "move": moveSelection,
     "clickCurrentElement": clickCurrentElement,
+    "printCurrentElement": printCurrentElement,
+    "playCurrentVideo": playCurrentVideo,
+    "muteCurrentVideo": muteCurrentVideo,
+    "playNextVideo": playNextVideo,
     "testServerLoopback": testServerLoopback
 };
 
