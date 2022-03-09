@@ -174,6 +174,26 @@ function playNextVideo(reqeust) {
     document.getElementsByClassName("ytp-next-button ytp-button")[0].click();
 }
 
+function pageUp(request) {
+    window.scrollBy(0, -200);
+}
+
+function pageDown(request) {
+    window.scrollBy(0, 200);
+}
+
+function back(reqeust) {
+    history.back();
+}
+
+function forward(reqeust) {
+    history.forward();
+}
+
+function closeTab(reqeust) {
+    chrome.runtime.sendMessage({ "sender": "content", "action": "closeCurrentTab" });
+}
+
 function testServerLoopback(reqeust) {
     console.log(scriptName, "testServerLoopback");
     chrome.runtime.sendMessage({ "sender": "content", "action": "testServerLoopback" });
@@ -236,9 +256,14 @@ const popupHandler = {
     "move": moveSelection,
     "clickCurrentElement": clickCurrentElement,
     "printCurrentElement": printCurrentElement,
-    "playCurrentVideo": playCurrentVideo,
-    "muteCurrentVideo": muteCurrentVideo,
-    "playNextVideo": playNextVideo,
+    "play": playCurrentVideo,
+    "mute": muteCurrentVideo,
+    "next": playNextVideo,
+    "pgup": pageUp,
+    "pgdn": pageDown,
+    "back": back,
+    "forward": forward,
+    "close": closeTab,
     "testServerLoopback": testServerLoopback
 };
 
