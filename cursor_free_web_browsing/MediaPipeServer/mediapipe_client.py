@@ -351,8 +351,9 @@ while True:
         #     center, width//2, height//2, history, startWidth, startHeight, closeWidth, closeHeight)
         current_time = get_current_milli_time()
         #if we grab the fist and it is legal to change gesture
+        if recognize_hand_gesture(keypoints, "Right") == "Fist" and modeSwitchState:
 
-        if avg_2d[1] < 0.10 and modeSwitchState:
+        #if avg_2d[1] < 0.10 and modeSwitchState:
             state +=1
             modeSwitchState = False
             t = Timer(1.0, timeout)
