@@ -42,17 +42,42 @@ document.addEventListener("DOMContentLoaded", function () {
     document
         .getElementById("play")
         .addEventListener("click",
-            sendMessageToContent({ "sender": "popup", "action": "playCurrentVideo" }),
+            sendMessageToContent({ "sender": "popup", "action": "play" }),
             false);
     document
         .getElementById("mute")
         .addEventListener("click",
-            sendMessageToContent({ "sender": "popup", "action": "muteCurrentVideo" }),
+            sendMessageToContent({ "sender": "popup", "action": "mute" }),
             false);
     document
         .getElementById("next")
         .addEventListener("click",
-            sendMessageToContent({ "sender": "popup", "action": "playNextVideo" }),
+            sendMessageToContent({ "sender": "popup", "action": "next" }),
+            false);
+    document
+        .getElementById("pgup")
+        .addEventListener("click",
+            sendMessageToContent({ "sender": "popup", "action": "pgup" }),
+            false);
+    document
+        .getElementById("pgdn")
+        .addEventListener("click",
+            sendMessageToContent({ "sender": "popup", "action": "pgdn" }),
+            false);
+    document
+        .getElementById("back")
+        .addEventListener("click",
+            sendMessageToContent({ "sender": "popup", "action": "back" }),
+            false);
+    document
+        .getElementById("forward")
+        .addEventListener("click",
+            sendMessageToContent({ "sender": "popup", "action": "forward" }),
+            false);
+    document
+        .getElementById("close")
+        .addEventListener("click",
+            sendMessageToContent({ "sender": "popup", "action": "close" }),
             false);
     document
         .getElementById("test_server_loopback")

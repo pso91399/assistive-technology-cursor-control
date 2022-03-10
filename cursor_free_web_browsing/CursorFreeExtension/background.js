@@ -24,6 +24,12 @@ chrome.runtime.onInstalled.addListener(() => {
         if (request["sender"] === "content" && request["action"] === "testServerLoopback") {
             socket.send("testServerLoopback");
         }
+
+        if (request["sender"] === "content" && request["action"] === "closeCurrentTab") {
+            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+                chrome.tabs.remove(tabs[0].id);
+            });
+        }
     });
 });
 
