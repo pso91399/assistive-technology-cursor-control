@@ -55,6 +55,128 @@ def timeout():
     global ctrlSwitchState
     modeSwitchState = True
     ctrlSwitchState = True
+
+def recognize_hand_gesture(landmarks, label):
+        # global select_ges
+        thumbState = 'UNKNOW'
+        indexFingerState = 'UNKNOW'
+        middleFingerState = 'UNKNOW'
+        ringFingerState = 'UNKNOW'
+        littleFingerState = 'UNKNOW'
+        thumbRight = False
+        thumbLeft = False
+        recognizedHandGesture = None
+
+        if label.strip() == 'Left':
+            pseudoFixKeyPoint = landmarks[2][0]
+
+            if pseudoFixKeyPoint < landmarks[3][0] < landmarks[4][0]:
+                thumbState = 'OPEN'
+            elif pseudoFixKeyPoint > landmarks[3][0] > landmarks[4][0]:
+                thumbState = 'CLOSE'
+        else:
+            pseudoFixKeyPoint = landmarks[2][0]
+
+            if pseudoFixKeyPoint < landmarks[3][0] < landmarks[4][0]:
+                thumbState = 'CLOSE'
+            elif pseudoFixKeyPoint > landmarks[3][0] > landmarks[4][0]:
+                thumbState = 'OPEN'
+
+        if (pseudoFixKeyPoint < landmarks[3][0] < landmarks[4][0] and landmarks[4][0] >
+                landmarks[17][0]):
+            thumbRight = True
+        elif (pseudoFixKeyPoint > landmarks[3][0] > landmarks[4][0] and landmarks[4][0] <
+              landmarks[17][0]):
+            thumbLeft = True
+
+        pseudoFixKeyPoint = landmarks[6][1]
+        if pseudoFixKeyPoint > landmarks[7][1] > landmarks[8][1]:
+            indexFingerState = 'OPEN'
+        elif pseudoFixKeyPoint < landmarks[7][1] < landmarks[8][1]:
+            indexFingerState = 'CLOSE'
+
+        pseudoFixKeyPoint = landmarks[10][1]
+        if pseudoFixKeyPoint > landmarks[11][1] > landmarks[12][1]:
+            middleFingerState = 'OPEN'
+        elif pseudoFixKeyPoint < landmarks[11][1] < landmarks[12][1]:
+            middleFingerState = 'CLOSE'
+
+        pseudoFixKeyPoint = landmarks[14][1]
+        if pseudoFixKeyPoint > landmarks[15][1] > landmarks[16][1]:
+            ringFingerState = 'OPEN'
+        elif pseudoFixKeyPoint < landmarks[15][1] < landmarks[16][1]:
+            ringFingerState = 'CLOSE'
+
+        pseudoFixKeyPoint = landmarks[18][1]
+        if pseudoFixKeyPoint > landmarks[19][1] > landmarks[20][1]:
+            littleFingerState = 'OPEN'
+        elif pseudoFixKeyPoint < landmarks[19][1] < landmarks[20][1]:
+            littleFingerState = 'CLOSE'
+
+        if thumbState == 'OPEN' and indexFingerState == 'OPEN' and middleFingerState == 'OPEN' and ringFingerState == 'OPEN' and littleFingerState == 'OPEN':
+            # and '5' in select_ges:
+            recognizedHandGesture = 5  # "FIVE"
+            # pressKey ( ges_key['5'] )
+
+        elif thumbState == 'CLOSE' and indexFingerState == 'OPEN' \
+                and middleFingerState == 'OPEN' and ringFingerState == 'OPEN' \
+                and littleFingerState == 'OPEN':
+
+            recognizedHandGesture = 4  # "FOUR"
+        elif thumbState == 'CLOSE' and indexFingerState == 'OPEN' \
+                and middleFingerState == 'OPEN' and ringFingerState == 'OPEN' \
+                and littleFingerState == 'CLOSE':
+
+            recognizedHandGesture = 3  # "THREE"
+
+        elif thumbState == 'OPEN' and indexFingerState == 'OPEN' \
+                and middleFingerState == 'CLOSE' and ringFingerState == 'CLOSE' \
+                and littleFingerState == 'CLOSE':
+            #     and '2' in select_ges:
+
+            # pressKey ( ges_key['2'] )
+            recognizedHandGesture = 'Arrow'  # "TWO"
+
+        elif thumbState == 'CLOSE' and indexFingerState == 'CLOSE' \
+                and middleFingerState == 'CLOSE' and ringFingerState == 'CLOSE' \
+                and littleFingerState == 'CLOSE':
+            #     and 'Fist' in select_ges:
+            # pressKey ( ges_key['Fist'] )
+            recognizedHandGesture = 'Fist'  # "FIST"
+
+        elif thumbState == 'CLOSE' and indexFingerState == 'OPEN' \
+                and middleFingerState == 'OPEN' and ringFingerState == 'CLOSE' \
+                and littleFingerState == 'CLOSE':
+            #     and 'Victory' in select_ges:
+            # pressKey ( ges_key['Victory'] )
+            recognizedHandGesture = 2  # "Victory"
+
+        elif (
+                thumbState == 'OPEN' and thumbLeft and indexFingerState == 'CLOSE' and middleFingerState == 'CLOSE' and ringFingerState == 'CLOSE' and littleFingerState == 'CLOSE'):
+            recognizedHandGesture = 'Thumb Left'
+        elif (
+                thumbState == 'OPEN' and thumbRight and indexFingerState == 'CLOSE' and middleFingerState == 'CLOSE' and ringFingerState == 'CLOSE' and littleFingerState == 'CLOSE'):
+            recognizedHandGesture = 'Thumb Right'
+
+
+        elif thumbState == 'CLOSE' and indexFingerState == 'OPEN' \
+                and middleFingerState == 'CLOSE' and ringFingerState == 'CLOSE' \
+                and littleFingerState == 'CLOSE':
+                # and '1' in select_ges:
+
+            #     keyboard.press('Ctrl')
+            # pressKey ( ges_key['1'] )  # ONE
+            recognizedHandGesture = 1  # "1"
+        else:
+            recognizedHandGesture = 0  # "UNKNOW"
+
+        print(thumbState,
+            indexFingerState,
+            middleFingerState,
+            ringFingerState,
+            littleFingerState,)
+
+        return recognizedHandGesture
 def hand_keypoints(hand_landmarks):
     points = []
     for landmark in hand_landmarks.landmark:
@@ -120,7 +242,6 @@ def joystick(center, frame):
     cv2.line(frame, tuple(joystick_center), tuple(
         np.int32(center)), (255, 0, 0), 2)
 
-
 relative_queue = collections.deque(10 * [(0, 0)], 10)
 
 
@@ -153,18 +274,22 @@ def mouse_command(keypoints, closed):
     if sum(closed) == 5:
         pyautogui.click()
 
-def process_pattern(center, w, h, startWidth, startHeight):
+def interactive_mode_recognition(center, w, h, startWidth, startHeight, keypoints):
     x, y = center[0], center[1]
-    if x < w + startWidth and x > w - startWidth and y > h-startHeight and y < h + startHeight:
-        message = "Pause"
-    elif y < h-startHeight:
-        message = "Up"
-    elif y > h + startHeight:        
-        message = "Down"
-    elif x < w + startWidth:
-        message  = "Left"
+    if recognize_hand_gesture(keypoints, 'Right')== 1 or recognize_hand_gesture(keypoints, 'Right')== 2:
+        message = "Click"
+        print(message)
     else:
-        message = "Right"
+        if x < w + startWidth and x > w - startWidth and y > h-startHeight and y < h + startHeight:
+            message = "Pause"
+        elif y < h-startHeight:
+            message = "Up"
+        elif y > h + startHeight:        
+            message = "Down"
+        elif x < w + startWidth:
+            message  = "Left"
+        else:
+            message = "Right"
     return message
 
 
@@ -226,8 +351,9 @@ while True:
         #     center, width//2, height//2, history, startWidth, startHeight, closeWidth, closeHeight)
         current_time = get_current_milli_time()
         #if we grab the fist and it is legal to change gesture
+        if recognize_hand_gesture(keypoints, "Right") == "Fist" and modeSwitchState:
 
-        if avg_2d[1] < 0.10 and modeSwitchState:
+        #if avg_2d[1] < 0.10 and modeSwitchState:
             state +=1
             modeSwitchState = False
             t = Timer(1.0, timeout)
@@ -239,7 +365,7 @@ while True:
         if current_time // 1000 != last_send_time // 1000 :
             if state%3 != 0:
                 if state%3 == 1:
-                    message = process_pattern(center,width//2, height//2, startWidth, startHeight)
+                    message = interactive_mode_recognition(center,width//2, height//2, startWidth, startHeight, keypoints)
                 elif state%3 == 2:
                     message = control_mode_recognition(center, keypoints, history)
                     history = center
