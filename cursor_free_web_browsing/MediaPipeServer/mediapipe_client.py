@@ -212,23 +212,23 @@ def process_line(center, history):
     if not history: 
         return ""
     scale = 3
-    staticThrehold = 50
+    verstaticThrehold = 50
+    hrzstaticThrehold = 80
     lastx, lasty = history[0], history[1]
     x, y = center[0], center[1]
     diffx, diffy = abs(lastx - x), abs(lasty - y)
-    if diffx > diffy and diffx > staticThrehold:
+    if diffx > diffy and diffx > hrzstaticThrehold:
         if diffx > scale*diffy:
             if x > lastx:
                 message = 'forward'
             else:
                 message = 'backward'
-    elif diffx < diffy and diffy > staticThrehold:
+    elif diffx < diffy and diffy > verstaticThrehold:
         if diffy > scale*diffx:
             if y > lasty:
                 message = 'pgdn'
             else:
                 message = 'pgup'
-    #history = history[1:]
     return message
 
 def joystick(center, frame):
@@ -304,6 +304,10 @@ def control_mode_recognition(center, keypoint, history):
         message = "close"
     else:
         message = process_line(center, history)
+    if not message:
+        if recognize_hand_gesture(keypoints, "Right") == "Arrow":
+            message = "next"
+
     return message
 
 
@@ -356,7 +360,7 @@ while True:
         #if avg_2d[1] < 0.10 and modeSwitchState:
             state +=1
             modeSwitchState = False
-            t = Timer(1.0, timeout)
+            t = Timer(2.0, timeout)
             t.start()  
         cv2.putText(frame, mode[state%3], (10, 200),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
@@ -370,11 +374,11 @@ while True:
                     message = control_mode_recognition(center, keypoints, history)
                     history = center
                     
-                    # ctrlSwitchState = False
-                    # t = Timer(1.0, timeout)
-                    # t.start()  
+                    #ctrlSwitchState = False
+                    #t = Timer(1.0, timeout)
+                    #t.start()  
                 #if message and ctrlSwitchState:     
-                if message:               
+                if message :               
                     sio.send(message, namespace='/mediapipe')
                     last_send_time = current_time
                     cv2.putText(frame, message, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
