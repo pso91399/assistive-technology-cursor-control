@@ -273,7 +273,15 @@ const backgroundHandler = {
 
 const serverHandler = {
     "move": moveSelection,
-    "click": clickCurrentElement
+    "click": clickCurrentElement,
+    "play": playCurrentVideo,
+    "mute": muteCurrentVideo,
+    "next": playNextVideo,
+    // "pgup": pageUp,
+    // "pgdn": pageDown,
+    "backward": back,
+    "forward": forward,
+    "close": closeTab
 }
 
 // Main entry of content.js code
@@ -281,6 +289,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request["sender"] === "popup") {
         popupHandler[request["action"]](request);
     } else if (request["sender"] === "background") {
+        console.log(scriptName, request["action"]);
         backgroundHandler[request["action"]](request);
     } else if (request["sender"] === "server") {
         serverHandler[request["action"]](request);

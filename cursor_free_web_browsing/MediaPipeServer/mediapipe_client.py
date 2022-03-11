@@ -277,19 +277,19 @@ def mouse_command(keypoints, closed):
 def interactive_mode_recognition(center, w, h, startWidth, startHeight, keypoints):
     x, y = center[0], center[1]
     if recognize_hand_gesture(keypoints, 'Right')== 1 or recognize_hand_gesture(keypoints, 'Right')== 2:
-        message = "Click"
+        message = "click"
         print(message)
     else:
         if x < w + startWidth and x > w - startWidth and y > h-startHeight and y < h + startHeight:
-            message = "Pause"
+            message = "pause"
         elif y < h-startHeight:
-            message = "Up"
+            message = "up"
         elif y > h + startHeight:        
-            message = "Down"
+            message = "down"
         elif x < w + startWidth:
-            message  = "Left"
+            message  = "left"
         else:
-            message = "Right"
+            message = "right"
     return message
 
 
