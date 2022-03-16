@@ -357,29 +357,37 @@ while cap.isOpened():
                 # cv2.line(image, (0.5 * width, 0.75 * height), (1 * width, 0.75 * height), (0, 255, 0), 3)
                 cv2. rectangle(image, (int(0.50 * width), int(0.75 * height)), (int(0.80 * width), int(0.25 * height)), (0, 255, 0), 3)
 
-                if right_hand == 1:
+                if right_hand == 'Arrow':
                     pyautogui.click()
                 elif right_hand == 2:
                     pyautogui.doubleClick()
-                elif right_hand == 'Arrow':
+                elif right_hand == 1:
                     pyautogui.rightClick()
             elif mode == 'volume':
                 keyboard = Controller()
-                if right_hand == 1:
-                    keyboard.tap(Key.media_volume_up)
-                    time.sleep(0.3)
-                elif right_hand == 'Arrow':
-                    keyboard.tap(Key.media_volume_down)
-                    time.sleep(0.3)
-                elif right_hand == 2:
-                    keyboard.tap(Key.media_volume_mute)
+                if time_start is None:
+                    time_start = time.time()
+                time_stamp = time.time()
+                if (time_stamp - time_start > 1):
+                    time_start = time_stamp
+                    if right_hand == 1:
+                        keyboard.tap(Key.media_volume_up)
+                    elif right_hand == 'Arrow':
+                        keyboard.tap(Key.media_volume_down)
+                    elif right_hand == 2:
+                        keyboard.tap(Key.media_volume_mute)
             elif mode == 'window':
-                if right_hand == 1: #switch to previous app
-                    pyautogui.hotkey('command', 'tab')
-                elif right_hand == 2: #browse windows
-                    pyautogui.hotkey('ctrl', 'up')
-                elif right_hand == 3: #minimize active window
-                    pyautogui.hotkey('command', 'm')
+                if time_start is None:
+                    time_start = time.time()
+                time_stamp = time.time()
+                if (time_stamp - time_start > 1):
+                    time_start = time_stamp
+                    if right_hand == 1: #switch to previous app
+                        pyautogui.hotkey('command', 'tab')
+                    elif right_hand == 2: #browse windows
+                        pyautogui.hotkey('ctrl', 'up')
+                    elif right_hand == 3: #minimize active window
+                        pyautogui.hotkey('command', 'm')
             elif mode == 'safari':
                 if time_start is None:
                     time_start = time.time()
