@@ -1,12 +1,8 @@
-from re import template
-from statistics import mode
-from unittest import result
 import numpy as np
 import cv2
 import math
-import mediapipe as mp
-from PIL import Image
-import csv
+import matplotlib.pyplot as plt
+
 
 # https://github.com/liruilong940607/Pose2Seg/blob/master/lib/transforms.py
 
@@ -104,8 +100,11 @@ def pose_affinematrix(src_kpt, dst_kpt, dst_area, hard=False):
     #vars_valid = ((sigmas * 2)**2)[visI]
     vars_valid = 1
     diff = warpAffinePoints(src_valid, matrix) - dst_valid
-    error = np.sum(diff**2, axis=1) / vars_valid / dst_area / 2
-    score = np.mean(np.exp(-error)) * np.sum(visI) / np.sum(visU)
+    # print(diff)
+    # error = np.sum(diff**2, axis=1) / vars_valid / dst_area / 2
+    # score = np.mean(np.exp(-error)) * np.sum(visI) / np.sum(visU)
+    error = np.sum(diff**2, axis=1) * 50
+    score = np.mean(np.exp(-error))
     
     return matrix, score
 
@@ -165,14 +164,43 @@ def solve_affinematrix(src, dst):
 #                 matrix = basic_matrix
 #                 category = -1
 
-temp = np.loadtxt('temp.csv', dtype = float, delimiter=',')
-input = np.loadtxt('input.csv', dtype = float, delimiter=',')
-print(temp.shape)
-print(input.shape)
-confident_col = np.ones((temp.shape[0],1))
-temp = np.hstack((temp, confident_col))
-input = np.hstack((temp, confident_col))
-print(temp.shape)
+# try to static image recognition
+five_temp = np.loadtxt('temp.csv', dtype = float, delimiter=',')
+arrow_temp = np.loadtxt('arrow_temp.csv', dtype=float,delimiter=',')
+five_input = np.loadtxt('input.csv', dtype = float, delimiter=',')
+arrow_input = np.loadtxt('arrow_input.csv', dtype=float,delimiter=',')
+# denormalize the data
+# five_temp[:,0] *= 4032 # width
+# print(five_temp[1,0])
+# five_temp[:,1] *= 3024 # height
+# arrow_temp[:,0] *= 4032 # width
+# arrow_temp[:,1] *= 3024 # height
+# input[:,0] *= 4032 # width
+# input[:,1] *= 3024 # height
 
-matrix, score = pose_affinematrix(input, temp, dst_area=1.0, hard=True)
-print(score)
+
+# print(temp.shape)
+# print(input.shape)
+confident_col = np.ones((five_temp.shape[0],1))
+five_temp = np.hstack((five_temp, confident_col))
+arrow_temp = np.hstack((arrow_temp, confident_col))
+arrow_input = np.hstack((arrow_input, confident_col))
+five_input = np.hstack((five_input, confident_col))
+print(five_temp.shape)
+
+five_matrix, five_score = pose_affinematrix(five_input, five_temp, dst_area=1.0, hard=True)
+arrow_matrix1, arrow_score1 = pose_affinematrix(five_input, arrow_temp, dst_area=1.0, hard=True)
+arrow_matrix2, arrow_score2 = pose_affinematrix(arrow_input, arrow_temp, dst_area=1.0, hard=True)
+#print(matrix.shape)
+#print(input.shape)
+# affined_input = warpAffinePoints(arrow_input[:,0:2], five_matrix)
+# print(affined_input.shape)
+# print(score)
+# plt.scatter(arrow_temp[:,0], five_temp[:,1], c='b', label='five_template')
+# plt.scatter(affined_input[:,0],affined_input[:,1],c='r', label='five_input')
+# plt.legend()
+# plt.show()
+# print(five_score, arrow_score)
+
+# score: fiveT_fiveI, arrowT_fiveI, arrowT_arrowI
+print(five_score, arrow_score1, arrow_score2)
