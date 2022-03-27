@@ -4,6 +4,7 @@ import os
 import cv2
 import csv
 import re
+import matplotlib.pyplot as plt
 
 
 # mediapipe drawing package
@@ -23,6 +24,7 @@ mp_hands = mp.solutions.hands
 
 def list_file_paths(directory):
     return [os.path.join(directory,file) for file in os.listdir(directory)]
+print(list_file_paths('template_image'))
 
 # initialize
 with mp_hands.Hands(
@@ -30,7 +32,7 @@ with mp_hands.Hands(
     max_num_hands=2,
     min_detection_confidence=0.5) as hands:
     # choose input or template images directory to generate keypoints
-  for idx, file in enumerate(list_file_paths('input_image')):
+  for idx, file in enumerate(list_file_paths('template_image')):
     # Read an image, flip it around y-axis for correct handedness output 
     image = cv2.flip(cv2.imread(file), 1)
     # Convert the BGR image to RGB before processing.
@@ -59,28 +61,38 @@ with mp_hands.Hands(
     #   log.close()
 
     # draw hand landmarks on the image
-      mp_drawing.draw_landmarks(
-          annotated_image,
-          hand_landmarks,
-          mp_hands.HAND_CONNECTIONS,
-          mp_drawing_styles.get_default_hand_landmarks_style(),
-          mp_drawing_styles.get_default_hand_connections_style())
+      # mp_drawing.draw_landmarks(
+      #     annotated_image,
+      #     hand_landmarks,
+      #     mp_hands.HAND_CONNECTIONS,
+      #     mp_drawing_styles.get_default_hand_landmarks_style(),
+      #     mp_drawing_styles.get_default_hand_connections_style())
+
     # cv2.imwrite(
     #     '/tmp/annotated_image' + str(idx) + '.png', cv2.flip(annotated_image, 1))
     # Draw hand world landmarks.
-    for hand_landmarks in results.multi_hand_landmarks:
-      mp_drawing.plot_landmarks(
-        hand_landmarks, mp_hands.HAND_CONNECTIONS, azimuth=5)
+    # for hand_landmarks in results.multi_hand_landmarks:
+    #   mp_drawing.plot_landmarks(
+    #     hand_landmarks, mp_hands.HAND_CONNECTIONS, azimuth=5)
     
-    my_landmark = np.array(hand_landmarks.landmark)
+      my_landmark = np.array(hand_landmarks.landmark)
     
     # save (x,y) keypoints to csv, and put it into corresponding folder
-    temp = []
-    for point in hand_landmarks.landmark:
-        temp.append([point.x,point.y])
-    
-    name = re.findall(r'\/(\w+).', file)[0]
-    path = re.findall(r'\_(\w+)', name)[0]
-    with open(path + '_data/' + name + '.csv','w') as f:
-        write = csv.writer(f)
-        write.writerows(temp)
+      temp = []
+      for point in hand_landmarks.landmark:
+          temp.append([point.x,point.y])
+
+      
+      name = re.findall(r'\/(\w+).', file)[0]
+      path = re.findall(r'\_(\w+)', name)[0]
+      
+      #plot the figure
+      # plt.scatter(temp[:,0], temp[:,1])
+      # plt.title("template of {}".format(name))
+      # plt.show()
+      # plt.clf()
+      
+
+      with open(path + '_data/' + name + '.csv','w') as f:
+          write = csv.writer(f)
+          write.writerows(temp)
