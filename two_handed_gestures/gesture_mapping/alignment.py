@@ -1,6 +1,9 @@
+"""this file contains functions for affine transformation and template matching"""
+
 import numpy as np
 import cv2
 import math
+
 
 
 # https://github.com/liruilong940607/Pose2Seg/blob/master/lib/transforms.py
