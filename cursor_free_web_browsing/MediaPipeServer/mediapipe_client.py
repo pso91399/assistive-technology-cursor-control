@@ -132,16 +132,11 @@ def recognize_hand_gesture(landmarks, label):
         elif thumbState == 'OPEN' and indexFingerState == 'OPEN' \
                 and middleFingerState == 'CLOSE' and ringFingerState == 'CLOSE' \
                 and littleFingerState == 'CLOSE':
-            #     and '2' in select_ges:
-
-            # pressKey ( ges_key['2'] )
-            recognizedHandGesture = 'Arrow'  # "TWO"
+            recognizedHandGesture = "Arrow"# "TWO"
 
         elif thumbState == 'CLOSE' and indexFingerState == 'CLOSE' \
                 and middleFingerState == 'CLOSE' and ringFingerState == 'CLOSE' \
                 and littleFingerState == 'CLOSE':
-            #     and 'Fist' in select_ges:
-            # pressKey ( ges_key['Fist'] )
             recognizedHandGesture = 'Fist'  # "FIST"
 
         elif thumbState == 'CLOSE' and indexFingerState == 'OPEN' \
@@ -162,19 +157,16 @@ def recognize_hand_gesture(landmarks, label):
         elif thumbState == 'CLOSE' and indexFingerState == 'OPEN' \
                 and middleFingerState == 'CLOSE' and ringFingerState == 'CLOSE' \
                 and littleFingerState == 'CLOSE':
-                # and '1' in select_ges:
 
-            #     keyboard.press('Ctrl')
-            # pressKey ( ges_key['1'] )  # ONE
             recognizedHandGesture = 1  # "1"
         else:
             recognizedHandGesture = 0  # "UNKNOW"
 
-        print(thumbState,
-            indexFingerState,
-            middleFingerState,
-            ringFingerState,
-            littleFingerState,)
+        # print(thumbState,
+        #     indexFingerState,
+        #     middleFingerState,
+        #     ringFingerState,
+        #     littleFingerState,)
 
         return recognizedHandGesture
 def hand_keypoints(hand_landmarks):
@@ -295,17 +287,17 @@ def interactive_mode_recognition(center, w, h, startWidth, startHeight, keypoint
 
 def control_mode_recognition(center, keypoint, history):
     message = ""
-    if (keypoint[4][1] < keypoint[3][1] < keypoint[5][1] < keypoint[9][1] < keypoint[13][1] <
-            keypoint[17][1] and keypoint[6][0] < keypoint[7][0]):
+    #if (keypoint[4][1] < keypoint[3][1] < keypoint[5][1] < keypoint[9][1] < keypoint[13][1] <
+    #        keypoint[17][1] and keypoint[6][0] < keypoint[7][0]):
+    if recognize_hand_gesture(keypoints, "Right") == "Arrow":
         message = "play"
-
     elif (keypoint[4][1] > keypoint[3][1] > keypoint[5][1] > keypoint[9][1] > keypoint[13][1] >
             keypoint[17][1] and keypoint[6][0] < keypoint[7][0]):
         message = "close"
     else:
         message = process_line(center, history)
     if not message:
-        if recognize_hand_gesture(keypoints, "Right") == "Arrow":
+        if recognize_hand_gesture(keypoints, "Right") == 4:
             message = "next"
 
     return message
@@ -383,23 +375,11 @@ while True:
                     last_send_time = current_time
                     cv2.putText(frame, message, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
-        #if current_time // 200 != last_send_time // 200 and state%3 == 2:
-        #     history.append(center)
 
         relative_queue.appendleft(center)
         center_queue.appendleft(center)
         center = np.mean(center_queue, axis=0)
 
-        # Cursor movement
-        """if cursor_control == "joystick":
-            joystick(center, frame)
-        elif cursor_control == "relative":
-            relative(center)
-        elif cursor_control == "absolute":
-            absolute(center)
-
-        if clicking_enabled:
-            mouse_command(keypoints, closed)"""
 
         cv2.circle(frame, tuple(np.int32(center)), 2, (0, 255, 0), 2)
         cv2.circle(frame, tuple(np.int32(center)), radius, (0, 255, 0), 2)
