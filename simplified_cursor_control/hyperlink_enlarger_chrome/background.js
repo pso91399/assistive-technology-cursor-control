@@ -11,17 +11,9 @@ chrome.runtime.onInstalled.addListener(() => {
     chrome.storage.local.set({ nearest_element_active });
 });
 
-// chrome.action.onClicked.addListener(() => {
-//     active = !active;
-//     if (active) {
-//         chrome.action.setIcon({ path: "/images/on.png" });
-//     } else {
-//         chrome.action.setIcon({ path: "/images/off.png" });
-//     }
-// });
-
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 
+    // check whether hyperlink enlarger function is active
     chrome.storage.local.get("hyperlink_enlarger_active", ({ hyperlink_enlarger_active }) => {
         if (hyperlink_enlarger_active && changeInfo.status == 'complete') {
             chrome.scripting.executeScript({
@@ -34,7 +26,8 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
             });
         }
     });
-    
+
+    // check whether button enlarger function is active
     chrome.storage.local.get("button_enlarger_active", ({ button_enlarger_active }) => {
         if (button_enlarger_active && changeInfo.status == 'complete') {
             chrome.scripting.executeScript({
@@ -44,6 +37,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         }
     });
     
+    // check whether nearest element function is active
     chrome.storage.local.get("nearest_element_active", ({ nearest_element_active }) => {
         if (nearest_element_active && changeInfo.status == 'complete') {
             chrome.scripting.executeScript({
@@ -192,8 +186,7 @@ function activateNearestElement() {
     )
 }
 
-
-
+// Enlarge the button where the mouse is hover on
 function enlargeButton() {
     let enlarge_button_string = `
         a, button, input[type="button"], input[type="submit"] { transition: all .2s ease-in-out; }
