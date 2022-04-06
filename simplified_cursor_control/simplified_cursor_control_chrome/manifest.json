@@ -1,0 +1,28 @@
+{
+  "name": "Hyperlink Enlarger",
+  "description": "Enlarge hyperlink on Google search page.",
+  "version": "1.0",
+  "manifest_version": 3,
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["storage", "activeTab", "scripting"],
+  "host_permissions": [
+    "http://*/",
+    "https://*/"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "/images/off.png",
+    "default_title": "HyperLink Enlarger"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "content_scripts": [
+    {
+        "matches": [ "<all_urls>" ],
+        "js": [ "jquery-3.6.0.min.js" ]
+    }
+  ]
+}

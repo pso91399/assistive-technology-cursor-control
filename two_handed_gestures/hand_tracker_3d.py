@@ -7,7 +7,7 @@ from non_maximum_suppression import non_max_suppression_fast
 
 
 class HandTracker3D():
-    r"""
+    """
     Class to use Google's Mediapipe HandTracking pipeline from Python.
     So far only detection of a single hand is supported.
     Any any image size and aspect ratio supported.

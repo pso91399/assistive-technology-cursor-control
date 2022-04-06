@@ -9,7 +9,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
-import gesture_learning.keypoints as kp
+import keypoints as kp
 
 # --------------------------------------------------------------------------------------------------
 

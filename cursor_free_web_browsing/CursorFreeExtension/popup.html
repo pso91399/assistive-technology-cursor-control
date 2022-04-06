@@ -6,12 +6,53 @@
 </head>
 
 <body>
-    <button id="up">Up</button>
-    <button id="down">Down</button>
-    <button id="left">Left</button>
-    <button id="right">Right</button>
-    <button id="click_current_element">Click</button>
-    <button id="test_server_loopback">Test</button>
+    <table>
+        <tr>
+            <td colspan="3"><p style="font-size: large;">Debug Menu</p></td>
+        </tr>
+        <tr>
+            <td colspan="3">Clickable Control</td>
+        </tr>
+        <tr>
+            <td><button style="width:100%" id="click_current_element">Click</button></td>
+            <td><button style="width:100%" id="up">Up</button></td>
+            <td><button style="width:100%" id="print_current_element">Print</button></td>
+        </tr>
+        <tr>
+            <td><button style="width:100%" id="left">Left</button></td>
+            <td><button style="width:100%" id="down">Down</button></td>
+            <td><button style="width:100%" id="right">Right</button></td>
+        </tr>
+        <tr>
+            <td colspan="3">Video Control</td>
+        </tr>
+        <tr>
+            <td><button style="width:100%" id="play">Play</button></td>
+            <td><button style="width:100%" id="mute">Mute</button></td>
+            <td><button style="width:100%" id="next">Next</button></td>
+        </tr>
+        <tr>
+            <td colspan="3">Page Control</td>
+        </tr>
+        <tr>
+            <td><button style="width:100%" id="pgup">Up</button></td>
+            <td><button style="width:100%" id="pgdn">Down</button></td>
+        </tr>
+        <tr>
+            <td colspan="3">Browser Control</td>
+        </tr>
+        <tr>
+            <td><button style="width:100%" id="back">Back</button></td>
+            <td><button style="width:100%" id="forward">Forward</button></td>
+            <td><button style="width:100%" id="close">Close</button></td>
+        </tr>
+        <tr>
+            <td colspan="3">Mediapipe Test</td>
+        </tr>
+        <tr>
+            <td colspan="3"><button style="width:100%" id="test_server_loopback">Test Message</button></td>
+        </tr>
+    </table>
     <script src="popup.js"></script>
 </body>
 

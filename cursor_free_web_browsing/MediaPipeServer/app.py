@@ -33,4 +33,4 @@ def message_mediapipe(message):
 
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    socketio.run(app, port='1998', debug=True)

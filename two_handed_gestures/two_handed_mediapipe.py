@@ -329,7 +329,7 @@ while cap.isOpened():
                 center_queue.appendleft(center)
                 center = np.mean(center_queue, axis=0)
                 absolute(center)
-                # joystick(center, image)
+                #joystick(center, image)
 
                 cv2.circle(image, tuple(np.int32(center)), 2, (0, 255, 0), 2)
                 cv2.circle(image, tuple(np.int32(center)), radius, (0, 255, 0), 2)
