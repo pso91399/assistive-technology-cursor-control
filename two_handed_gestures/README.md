@@ -3,10 +3,10 @@ An computer control application that allows cursor browsing, clicking, volume co
 
 ## System Overview
 
-![alt text](Recognition.png)
+![System](System.png)
 
 ## Gesture Mapping
-
+![Recognition](Recognition.png)
 | Left Hand| Right Hand | Command |
 | ----------- | ----------- | -----------|
 | 1 |  N/A | cursor moving |
@@ -39,6 +39,7 @@ For now the main script does not contain affine alignment recognition method, us
 
 
 ## Affine Alignment Gesture Recognition
+
 *gesture_mapping* folder contains all the functions and templates.
 
 To check the method:
