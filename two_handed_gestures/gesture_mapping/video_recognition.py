@@ -12,7 +12,6 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
 
-
 # video recognition
 
 # load five_template keypoints
@@ -31,7 +30,8 @@ def load_temp():
     confident_col = np.ones((21,1))
     templates = []
     templates_category = []
-    for _, file in enumerate(list_file_paths('temp_data')):
+    files = ["temp_data/arrow_temp.csv", "temp_data/fist_temp.csv","temp_data/five_temp.csv","temp_data/four_temp.csv","temp_data/one_temp.csv",]
+    for file in files:
         name = name = re.findall(r'\/(\w+).', file)[0]
         temp = np.hstack((np.loadtxt(file, dtype = float, delimiter=','), confident_col))
         templates.append(temp)

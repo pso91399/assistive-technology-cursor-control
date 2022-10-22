@@ -348,7 +348,7 @@ while cap.isOpened():
                 # center and palm tracking
                 cv2.circle(image, tuple(np.int32(center)), 2, (0, 255, 0), 2)
                 cv2.circle(image, tuple(np.int32(center)), radius, (0, 255, 0), 2)
-                cv2.circle(image, tuple(joystick_center), joystick_radius, (255, 0, 0), 2)
+                # cv2.circle(image, tuple(joystick_center), joystick_radius, (255, 0, 0), 2)
 
                 # hand movement area
                 # cv2.line(image, (0.5 * width, 0.25 * height), (0.5 * width, 0.75 * height), (0, 255, 0), 3)

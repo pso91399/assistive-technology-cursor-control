@@ -25,8 +25,8 @@ and classifying into the gesture of smalledst error / highest score
 # (x, y) landmark, input array shape: [21,2]
 # add confidence column to the right of input array -> [21,3]
 confident_col = np.ones((21,1))
-five_temp = np.hstack((np.loadtxt('template_data/five_temp.csv', dtype = float, delimiter=','), confident_col))
-arrow_temp = np.hstack((np.loadtxt('template_data/arrow_temp.csv', dtype=float,delimiter=','), confident_col))
+five_temp = np.hstack((np.loadtxt('temp_data/five_temp.csv', dtype = float, delimiter=','), confident_col))
+arrow_temp = np.hstack((np.loadtxt('temp_data/arrow_temp.csv', dtype=float,delimiter=','), confident_col))
 five_input = np.hstack((np.loadtxt('input_data/five_input.csv', dtype = float, delimiter=','), confident_col))
 arrow_input = np.hstack((np.loadtxt('input_data/arrow_input.csv', dtype=float,delimiter=','), confident_col))
 print(five_temp.shape)
