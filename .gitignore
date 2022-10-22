@@ -1,14 +1,5 @@
 **/__pycache__
 **/.ipynb_checkpoints
 **/.idea
-*.png
-*.csv
-*.jpeg
-**/input_data
-**/input_image
 **/landmark_figs
-**/mp_annotated_image
-**/temp_data
-**/template_image
-**/tmp_data
 **/.DS_Store
