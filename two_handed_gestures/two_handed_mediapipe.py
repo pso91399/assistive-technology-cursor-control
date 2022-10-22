@@ -248,8 +248,10 @@ mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(
     min_detection_confidence=0.7)
 cap = cv2.VideoCapture(0)
-mode_mapping = {1: 'cursor', 2: 'scroll', 3: 'volume', 4: 'window', 5: 'safari'}
+mode_mapping = {1: 'cursor', 2: 'scroll', 3: 'volume', 4: 'window', 5: 'safari', 'Arrow': 'keyboard'}
 time_start = None
+keyboard_mode = False
+prev_key = None
 center_queue = collections.deque(5 * [(0, 0)], 5)
 
 success, image = cap.read()
@@ -278,7 +280,7 @@ while cap.isOpened():
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
     if results.multi_hand_landmarks:
-        right_hand = None
+        right_hand, right_landmarks = None, None
         left_hand = None
         for i, hand_landmarks in enumerate(results.multi_hand_landmarks):
             handedness = results.multi_handedness[i].classification[0].label
@@ -309,7 +311,7 @@ while cap.isOpened():
         if left_hand in mode_mapping:
             mode = mode_mapping[left_hand]
             cv2.putText(image, 'mode: ' + mode, (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (209, 80, 0, 255), 3)
-            if mode == 'scroll':
+            if mode == 'scroll' and not keyboard_mode:
                 if right_hand == 1:
                     # pyautogui.press('up')
                     pyautogui.scroll(5)
@@ -321,7 +323,7 @@ while cap.isOpened():
                     pyautogui.hscroll(10)
                 elif right_hand == 3:
                     pyautogui.hscroll(-10) 
-            elif mode == 'cursor':
+            elif mode == 'cursor' and not keyboard_mode and right_landmarks:
                 keypoints = hand_keypoints(right_landmarks)
                 center, radius = palm_center(keypoints)
                 center_queue.appendleft(center)
@@ -339,7 +341,7 @@ while cap.isOpened():
                     pyautogui.doubleClick()
                 elif right_hand == 'Arrow':
                     pyautogui.rightClick()
-            elif mode == 'volume':
+            elif mode == 'volume' and not keyboard_mode:
                 keyboard = Controller()
                 if right_hand == 1:
                     keyboard.tap(Key.media_volume_up)
@@ -349,14 +351,14 @@ while cap.isOpened():
                     time.sleep(0.3)
                 elif right_hand == 2:
                     keyboard.tap(Key.media_volume_mute)
-            elif mode == 'window':
+            elif mode == 'window' and not keyboard_mode:
                 if right_hand == 1: #switch to previous app
                     pyautogui.hotkey('command', 'tab')
                 elif right_hand == 2: #browse windows
                     pyautogui.hotkey('ctrl', 'up')
                 elif right_hand == 3: #minimize active window
                     pyautogui.hotkey('command', 'm')
-            elif mode == 'safari':
+            elif mode == 'safari' and not keyboard_mode:
                 if time_start is None:
                     time_start = time.time()
                 time_stamp = time.time()
@@ -405,6 +407,90 @@ while cap.isOpened():
                         Keyboard.release('w')
                         Keyboard.release(Key.cmd)
                         #time.sleep(0.5)
+            elif mode == 'keyboard':
+                if time_start is None:
+                    time_start = time.time()
+                time_stamp = time.time()
+                if (time_stamp - time_start > 1):
+                    time_start = time_stamp
+                    if keyboard_mode:
+                        keyboard_mode = False
+                    else:
+                        keyboard_mode = True
+            elif keyboard_mode:
+                letter_mappings = {'cursor': 'a b c d e', 'scroll': 'f g h i j', 'volume': 'k l m n o', 'window': 'p q r s t', 'safari': 'u v w x y z'}
+                cv2.putText(image, letter_mappings[mode],
+                (10, 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (209, 80, 0, 255), 3)
+                if time_start is None:
+                    time_start = time.time()
+                time_stamp = time.time()
+                if (time_stamp - time_start > 1):
+                    time_start = time_stamp
+                    Keyboard = Controller()
+                    if mode == 'cursor':
+                        if right_hand == 1:
+                            Keyboard.press('a')
+                        elif right_hand == 2:
+                            Keyboard.press('b')
+                        elif right_hand == 3:
+                            Keyboard.press('c')
+                        elif right_hand == 4:
+                            Keyboard.press('d')
+                        elif right_hand == 5:
+                            Keyboard.press('e')
+                    elif mode == 'scroll':
+                        if right_hand == 1:
+                            Keyboard.press('f')
+                        elif right_hand == 2:
+                            Keyboard.press('g')
+                        elif right_hand == 3:
+                            Keyboard.press('h')
+                        elif right_hand == 4:
+                            Keyboard.press('i')
+                        elif right_hand == 5:
+                            Keyboard.press('j')
+                    elif mode == 'volume':
+                        if right_hand == 1:
+                            Keyboard.press('k')
+                        elif right_hand == 2:
+                            Keyboard.press('l')
+                        elif right_hand == 3:
+                            Keyboard.press('m')
+                        elif right_hand == 4:
+                            Keyboard.press('n')
+                        elif right_hand == 5:
+                            Keyboard.press('o')
+                    elif mode == 'window':
+                        if right_hand == 1:
+                            Keyboard.press('p')
+                        elif right_hand == 2:
+                            Keyboard.press('q')
+                        elif right_hand == 3:
+                            Keyboard.press('r')
+                        elif right_hand == 4:
+                            Keyboard.press('s')
+                        elif right_hand == 5:
+                            Keyboard.press('t')
+                    elif mode == 'safari':
+                        if right_hand == 1:
+                            Keyboard.press('u')
+                        elif right_hand == 2:
+                            Keyboard.press('v')
+                        elif right_hand == 3:
+                            Keyboard.press('w')
+                        elif right_hand == 4:
+                            Keyboard.press('x')
+                        elif right_hand == 5:
+                            Keyboard.press('y')
+                        elif right_hand == 'Arrow':
+                            Keyboard.press('z')
+                        elif right_hand == 'Thumb Left':
+                            pyautogui.press('backspace')
+                        elif right_hand == 'Fist':
+                            pyautogui.press('enter')
+            cv2.putText(image, 'keyboard mode: ' + ('on' if keyboard_mode else 'off'),
+                (10, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (209, 80, 0, 255), 3)
+            
 
                 
 
