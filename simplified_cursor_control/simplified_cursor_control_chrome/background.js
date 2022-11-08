@@ -1,21 +1,23 @@
 //background.js
 
 var nearestElement;
-var hyperlink_enlarger_active = false;
-var button_enlarger_active = false;
-var nearest_element_active = false;
+var hyperlinkEnlargerActive = false;
+var buttonEnlargerActive = false;
+var nearestElementActive = false;
+var remindPopupActive = false;
 
 chrome.runtime.onInstalled.addListener(() => {
-    chrome.storage.local.set({ hyperlink_enlarger_active });
-    chrome.storage.local.set({ button_enlarger_active });
-    chrome.storage.local.set({ nearest_element_active });
+    chrome.storage.local.set({ hyperlinkEnlargerActive: hyperlinkEnlargerActive });
+    chrome.storage.local.set({ buttonEnlargerActive });
+    chrome.storage.local.set({ nearestElementActive });
+    chrome.storage.local.set({ remindPopupActive });
 });
 
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 
     // check whether hyperlink enlarger function is active
-    chrome.storage.local.get("hyperlink_enlarger_active", ({ hyperlink_enlarger_active }) => {
-        if (hyperlink_enlarger_active && changeInfo.status == 'complete') {
+    chrome.storage.local.get("hyperlinkEnlargerActive", ({ hyperlinkEnlargerActive }) => {
+        if (hyperlinkEnlargerActive && changeInfo.status == 'complete') {
             chrome.scripting.executeScript({
                 target: { tabId: tab.id },
                 function: setBackgroundColor,
@@ -28,8 +30,8 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     });
 
     // check whether button enlarger function is active
-    chrome.storage.local.get("button_enlarger_active", ({ button_enlarger_active }) => {
-        if (button_enlarger_active && changeInfo.status == 'complete') {
+    chrome.storage.local.get("buttonEnlargerActive", ({ buttonEnlargerActive }) => {
+        if (buttonEnlargerActive && changeInfo.status == 'complete') {
             chrome.scripting.executeScript({
                 target: { tabId: tab.id },
                 function: enlargeButton,
@@ -38,8 +40,8 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     });
     
     // check whether nearest element function is active
-    chrome.storage.local.get("nearest_element_active", ({ nearest_element_active }) => {
-        if (nearest_element_active && changeInfo.status == 'complete') {
+    chrome.storage.local.get("nearestElementActive", ({ nearestElementActive }) => {
+        if (nearestElementActive && changeInfo.status == 'complete') {
             chrome.scripting.executeScript({
                 target: { tabId: tab.id },
                 function: highlightNearestElement,
@@ -51,6 +53,14 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         }
     });
 
+    chrome.storage.local.get("remindPopupActive", ({ remindPopupActive }) => {
+        if (remindPopupActive && changeInfo.status == 'complete') {
+            chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                function: remindPopup,
+            });
+        }
+    });
 });
 
 
@@ -196,3 +206,83 @@ function enlargeButton() {
     style.textContent = enlarge_button_string;
     document.head.append(style);
 }
+
+// Remind how to close a popup by blinking the background color between hightligh color (currently blue) and transparent
+function remindPopup() {
+    let lastDate = new Date();  // Timestamp of last backgroud color change
+    let is_set = false;  // Whether backgroud color is set or not
+    let threshold =300;  // Time interval of background blinking 
+    document.addEventListener(
+        "pointermove",
+        ev => {
+            let curDate = new Date();
+            // Check whether a popup appears and the time interval is greater than or equal to threshold
+            if (document.getElementsByClassName("login-modal-div") !== null && curDate - lastDate >= threshold) {
+                if (!is_set) {  // Set background color to highlight color if current status is not set
+                    document.getElementsByClassName("login-modal-div")[0].style.backgroundColor = "rgba(135, 206, 235, 0.5)";
+                    is_set = ~is_set;
+                } else {  // Set background color to transparent if current status is set
+                    document.getElementsByClassName("login-modal-div")[0].style.backgroundColor = "rgba(0,0,0,0.0)";
+                    is_set = ~is_set;
+                }
+                lastDate = new Date();
+            }
+            
+        },
+        {
+            passive: true,
+        }
+    );
+
+    // function pausecomp(millis) {
+    //     var date = new Date();
+    //     var curDate = null;
+    //     do { curDate = new Date(); }
+    //     while(curDate-date < millis);
+    // }
+
+    // function waitForElm(selector) {
+    //     return new Promise(resolve => {
+    //         if (document.querySelector(selector)) {
+    //             return resolve(document.querySelector(selector));
+    //         }
+    
+    //         const observer = new MutationObserver(mutations => {
+    //             if (document.querySelector(selector)) {
+    //                 resolve(document.querySelector(selector));
+    //                 observer.disconnect();
+    //             }
+    //         });
+    
+    //         observer.observe(document.body, {
+    //             childList: true,
+    //             subtree: true
+    //         });
+    //     });
+    // }
+
+    // if (document.URL.includes("www.geeksforgeeks.org") ) {
+    //     // console.log("in URL");
+    //     // // const delay = ms => new Promise(res => setTimeout(res, ms));
+    //     // // await delay(5000);
+    //     // pausecomp(20000);
+    //     document.getElementsByClassName("login-modal-div")[0].style.backgroundColor = "rgba(200,0,0,0.4)";
+    //     // // waitForElm('.login-modal-div').then((elm) => {
+    //     // //     console.log('Element is ready');
+    //     // //     elm.style.backgroundColor = 'rgba(200,0,0,0.4)';
+    //     // // });
+    //     // console.log("after URL");
+
+    //     // // $("body").children().each(function () {
+    //     // //     $(this).html( $(this).html().replace(/display: block;/g,"display: none;") );
+    //     // // });
+
+    //     // $("body").children().each(function () {
+    //     //     $(this).html( $(this).html().replace(/<div class=\\"login-modal-div\\" style=\\"display: block\\";><\/div>/g,
+    //     //     '<div class="login-modal-div" style="display: block"; background-color: rgba(200, 0, 0, 0.4);></div>')
+    //     //     );
+    //     // });
+        
+    // }
+}
+
