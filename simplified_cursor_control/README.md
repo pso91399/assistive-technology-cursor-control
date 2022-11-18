@@ -7,6 +7,7 @@ A Chrome/Firefox extension to simplify cursor movement for web-browsing. Current
 makes a button larger when hovering
 - Click Nearest Element: highlights the nearest clickable hyperlink and makes it clickable without hovering
 - Button Enlarger: makes a button larger when hovering
+- Popup Reminder: reminds users to click background to close a popup window with blinking effect (offered only in Chrome Extention)
 
 ## Installation
 ## Firefox 
